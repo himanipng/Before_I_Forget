@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Globe2 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
+import { startMemory } from "@/lib/api";
 import type { Goal, Language, MemoryType, Relationship } from "@/lib/types";
 
 const relationships: Relationship[] = ["parent", "grandparent", "friend", "sibling", "teacher", "other"];
@@ -20,20 +21,33 @@ export default function StartPage() {
     language: "Hindi" as Language,
     memoryType: "recipe" as MemoryType,
     goal: "preserve story" as Goal,
+    storyText:
+      "She made chai every morning before school. She crushed ginger with cardamom and waited until the kitchen smelled warm.",
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function submit(event: FormEvent) {
     event.preventDefault();
     setLoading(true);
-    const response = await fetch("/api/start-interview", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    const data = await response.json();
-    localStorage.setItem("beforeIForget.session", JSON.stringify({ ...form, questions: data.questions }));
-    router.push("/interview");
+    setError("");
+
+    try {
+      const result = await startMemory(form);
+
+      if (result.memoryCard) {
+        localStorage.setItem("beforeIForget.pendingMemory", JSON.stringify(result.memoryCard));
+        router.push(`/memory/${result.memoryCard.memoryId}`);
+        return;
+      }
+
+      localStorage.setItem("beforeIForget.workflow", JSON.stringify({ ...form, executionArn: result.executionArn }));
+      router.push("/archive");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Unable to start this memory.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -77,9 +91,22 @@ export default function StartPage() {
                   {goals.map((item) => <option key={item}>{item}</option>)}
                 </select>
               </Field>
+              <div className="md:col-span-2">
+                <Field label="Story or voice-note transcript">
+                  <textarea
+                    value={form.storyText}
+                    onChange={(e) => setForm({ ...form, storyText: e.target.value })}
+                    className="field min-h-40 resize-none leading-7"
+                    placeholder="Write the story you want preserved..."
+                  />
+                </Field>
+              </div>
             </div>
+            {error ? (
+              <p className="mt-5 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">{error}</p>
+            ) : null}
             <button disabled={loading} className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-rose-900 px-6 py-4 font-semibold text-white shadow-lg shadow-rose-950/15 transition hover:bg-rose-950 disabled:opacity-60 sm:w-auto">
-              {loading ? "Generating questions..." : "Generate gentle questions"} <ArrowRight size={18} />
+              {loading ? "Starting memory..." : "Start memory workflow"} <ArrowRight size={18} />
             </button>
           </form>
         </div>

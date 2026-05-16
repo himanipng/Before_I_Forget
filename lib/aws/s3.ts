@@ -1,26 +1,39 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { env, hasS3Config } from "@/lib/env";
+import { getS3Client } from "./clients";
 
-let client: S3Client | null = null;
-
-export function getS3Client() {
-  if (!client) {
-    client = new S3Client({ region: process.env.AWS_REGION || "us-east-1" });
-  }
-  return client;
+function safeName(fileName: string) {
+  return fileName
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 120);
 }
 
-export async function uploadMemoryFileMockReady(key: string, body: Uint8Array | string) {
-  if (!process.env.S3_BUCKET_NAME) {
-    return { bucket: "mock-before-i-forget", key, mocked: true };
+export async function createPresignedUploadUrl(
+  fileName: string,
+  contentType: string,
+): Promise<{ uploadUrl: string; fileKey: string }> {
+  const fileKey = `uploads/${Date.now()}-${safeName(fileName || "memory-file")}`;
+  const s3Client = getS3Client();
+
+  if (!hasS3Config || !s3Client) {
+    return {
+      uploadUrl: `https://mock-upload.before-i-forget.local/${fileKey}`,
+      fileKey,
+    };
   }
 
-  await getS3Client().send(
-    new PutObjectCommand({
-      Bucket: process.env.S3_BUCKET_NAME,
-      Key: key,
-      Body: body,
-    }),
-  );
+  const command = new PutObjectCommand({
+    Bucket: env.S3_BUCKET_NAME,
+    Key: fileKey,
+    ContentType: contentType || "application/octet-stream",
+  });
 
-  return { bucket: process.env.S3_BUCKET_NAME, key, mocked: false };
+  return {
+    uploadUrl: await getSignedUrl(s3Client, command, { expiresIn: 900 }),
+    fileKey,
+  };
 }

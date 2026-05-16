@@ -2,22 +2,33 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { Download, Languages, Save, Volume2 } from "lucide-react";
 import { MemoryCard } from "@/components/MemoryCard";
 import { Navbar } from "@/components/Navbar";
-import type { MemoryCardData } from "@/lib/types";
+import { getMemory, saveMemory } from "@/lib/api";
+import type { MemoryCard as MemoryCardType } from "@/lib/types";
 
 export default function MemoryPage() {
-  const [memory, setMemory] = useState<MemoryCardData | null>(null);
+  const params = useParams<{ id: string }>();
+  const [memory, setMemory] = useState<MemoryCardType | null>(null);
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const raw = localStorage.getItem("beforeIForget.pendingMemory");
     if (raw) {
-      queueMicrotask(() => setMemory(JSON.parse(raw)));
+      const parsed = JSON.parse(raw) as MemoryCardType;
+      if (parsed.memoryId === params.id) {
+        queueMicrotask(() => setMemory(parsed));
+        return;
+      }
     }
-  }, []);
+    getMemory(params.id)
+      .then((loaded) => setMemory(loaded))
+      .catch((caught) => setError(caught instanceof Error ? caught.message : "Unable to load memory."));
+  }, [params.id]);
 
   async function translate() {
     if (!memory) return;
@@ -28,8 +39,9 @@ export default function MemoryPage() {
       body: JSON.stringify({ text: memory.summary, sourceLanguage: memory.language, targetLanguage: "English" }),
     });
     const data = await response.json();
-    setMemory({ ...memory, translatedText: data.translatedText });
-    localStorage.setItem("beforeIForget.pendingMemory", JSON.stringify({ ...memory, translatedText: data.translatedText }));
+    const next = { ...memory, translatedText: data.translatedText };
+    setMemory(next);
+    localStorage.setItem("beforeIForget.pendingMemory", JSON.stringify(next));
     setBusy("");
   }
 
@@ -42,19 +54,16 @@ export default function MemoryPage() {
       body: JSON.stringify({ gratitudeLetter: memory.gratitudeLetter, voice: "Joanna" }),
     });
     const data = await response.json();
-    setMemory({ ...memory, audioUrl: data.audioUrl });
-    localStorage.setItem("beforeIForget.pendingMemory", JSON.stringify({ ...memory, audioUrl: data.audioUrl }));
+    const next = { ...memory, audioUrl: data.audioUrl };
+    setMemory(next);
+    localStorage.setItem("beforeIForget.pendingMemory", JSON.stringify(next));
     setBusy("");
   }
 
   async function save() {
     if (!memory) return;
     setBusy("save");
-    await fetch("/api/save-memory", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(memory),
-    });
+    await saveMemory(memory);
     setSaved(true);
     setBusy("");
   }
@@ -76,7 +85,7 @@ export default function MemoryPage() {
         <Navbar />
         <main className="grid min-h-screen place-items-center bg-[#fffaf5] px-4 text-center">
           <div>
-            <h1 className="text-3xl font-semibold text-stone-950">No memory card is open.</h1>
+            <h1 className="text-3xl font-semibold text-stone-950">{error || "No memory card is open."}</h1>
             <Link href="/start" className="mt-5 inline-flex rounded-full bg-rose-900 px-5 py-3 font-semibold text-white">Start a Memory</Link>
           </div>
         </main>

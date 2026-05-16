@@ -4,14 +4,18 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Archive, Search } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
-import type { MemoryCardData } from "@/lib/types";
+import { listMemories } from "@/lib/api";
+import type { MemoryCard } from "@/lib/types";
 
 export default function ArchivePage() {
-  const [memories, setMemories] = useState<MemoryCardData[]>([]);
+  const [memories, setMemories] = useState<MemoryCard[]>([]);
+  const [error, setError] = useState("");
   const [filters, setFilters] = useState({ relationship: "", country: "", memoryType: "", language: "" });
 
   useEffect(() => {
-    fetch("/api/memories").then((res) => res.json()).then((data) => setMemories(data.memories || []));
+    listMemories()
+      .then(setMemories)
+      .catch((caught) => setError(caught instanceof Error ? caught.message : "Unable to load memories."));
   }, []);
 
   const filtered = useMemo(() => {
@@ -23,7 +27,7 @@ export default function ArchivePage() {
     );
   }, [filters, memories]);
 
-  const unique = (key: keyof MemoryCardData) => Array.from(new Set(memories.map((memory) => String(memory[key] || "")).filter(Boolean)));
+  const unique = (key: keyof MemoryCard) => Array.from(new Set(memories.map((memory) => String(memory[key] || "")).filter(Boolean)));
 
   return (
     <>
@@ -42,15 +46,16 @@ export default function ArchivePage() {
               </select>
             ))}
           </div>
+          {error ? <p className="mt-5 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">{error}</p> : null}
           {filtered.length ? (
             <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {filtered.map((memory) => (
-                <article key={memory.id} className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-stone-900/5">
+                <Link key={memory.memoryId} href={`/memory/${memory.memoryId}`} className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-stone-900/5 transition hover:-translate-y-1 hover:shadow-lg">
                   <p className="text-sm font-semibold uppercase tracking-[0.14em] text-rose-900">{memory.relationship} · {memory.language}</p>
                   <h2 className="mt-3 text-2xl font-semibold text-stone-950">{memory.title}</h2>
                   <p className="mt-3 line-clamp-4 leading-7 text-stone-600">{memory.summary}</p>
                   <p className="mt-4 text-sm text-stone-500">{memory.personName}{memory.country ? `, ${memory.country}` : ""}</p>
-                </article>
+                </Link>
               ))}
             </div>
           ) : (
