@@ -4,8 +4,8 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Globe2 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
-import { startMemory } from "@/lib/api";
-import type { Goal, Language, MemoryType, Relationship } from "@/lib/types";
+import { getWorkflowStatus, startMemory } from "@/lib/api";
+import type { Goal, Language, MemoryCard, MemoryType, Relationship } from "@/lib/types";
 
 const relationships: Relationship[] = ["parent", "grandparent", "friend", "sibling", "teacher", "other"];
 const languages: Language[] = ["English", "Hindi", "Spanish", "Mandarin", "Arabic", "Tagalog", "Vietnamese", "French", "other"];
@@ -25,11 +25,13 @@ export default function StartPage() {
       "She made chai every morning before school. She crushed ginger with cardamom and waited until the kitchen smelled warm.",
   });
   const [loading, setLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
   const [error, setError] = useState("");
 
   async function submit(event: FormEvent) {
     event.preventDefault();
     setLoading(true);
+    setStatusMessage("Starting the memory workflow...");
     setError("");
 
     try {
@@ -39,6 +41,17 @@ export default function StartPage() {
         localStorage.setItem("beforeIForget.pendingMemory", JSON.stringify(result.memoryCard));
         router.push(`/memory/${result.memoryCard.memoryId}`);
         return;
+      }
+
+      if (result.executionArn) {
+        setStatusMessage("Listening for the workflow result...");
+        const completedMemory = await waitForWorkflow(result.executionArn);
+
+        if (completedMemory) {
+          localStorage.setItem("beforeIForget.pendingMemory", JSON.stringify(completedMemory));
+          router.push(`/memory/${completedMemory.memoryId}`);
+          return;
+        }
       }
 
       localStorage.setItem("beforeIForget.workflow", JSON.stringify({ ...form, executionArn: result.executionArn }));
@@ -105,14 +118,43 @@ export default function StartPage() {
             {error ? (
               <p className="mt-5 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">{error}</p>
             ) : null}
-            <button disabled={loading} className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-rose-900 px-6 py-4 font-semibold text-white shadow-lg shadow-rose-950/15 transition hover:bg-rose-950 disabled:opacity-60 sm:w-auto">
-              {loading ? "Starting memory..." : "Start memory workflow"} <ArrowRight size={18} />
-            </button>
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <button disabled={loading} className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-rose-900 px-6 py-4 font-semibold text-white shadow-lg shadow-rose-950/15 transition hover:bg-rose-950 disabled:opacity-60 sm:w-auto">
+                {loading ? "Starting memory..." : "Start memory workflow"} <ArrowRight size={18} />
+              </button>
+              {loading && statusMessage ? <p className="text-sm font-medium text-stone-600">{statusMessage}</p> : null}
+            </div>
           </form>
         </div>
       </main>
     </>
   );
+}
+
+async function waitForWorkflow(executionArn: string): Promise<MemoryCard | null> {
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    await new Promise((resolve) => setTimeout(resolve, attempt === 0 ? 800 : 2000));
+    const status = await getWorkflowStatus(executionArn);
+
+    if (status.status === "SUCCEEDED") {
+      return isMemoryCard(status.output) ? status.output : null;
+    }
+
+    if (status.status === "FAILED" || status.status === "TIMED_OUT" || status.status === "ABORTED") {
+      throw new Error("The memory workflow did not finish. Please try again.");
+    }
+  }
+
+  return null;
+}
+
+function isMemoryCard(value: unknown): value is MemoryCard {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const candidate = value as Partial<MemoryCard>;
+  return Boolean(candidate.memoryId && candidate.title && candidate.summary && candidate.gratitudeLetter);
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {

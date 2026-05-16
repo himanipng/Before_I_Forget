@@ -14,7 +14,7 @@ Many families carry their most important history in voice notes, recipes, repeat
 - **Amazon Transcribe**: SDK-ready voice-to-text integration, mocked for local demo.
 - **Amazon Translate**: route contract and SDK-ready translation helper, mocked for local demo.
 - **Amazon Polly**: route contract and SDK-ready speech synthesis helper, mocked for local demo.
-- **DynamoDB-style storage**: clean storage abstraction for memory cards and sessions, backed by local JSON for demo.
+- **DynamoDB storage**: clean storage abstraction for memory cards and sessions, backed by DynamoDB when AWS env vars exist and local JSON/mock mode for safe demos.
 - **API Gateway/Lambda style**: each `app/api/*/route.ts` is structured as a serverless handler boundary.
 - **Cognito-ready auth placeholder**: the demo does not require login, but the data model is ready for user/session ownership.
 
@@ -63,6 +63,24 @@ Copy `.env.example` to `.env.local` when connecting real AWS services.
 - `POST /api/upload-url`
 - `GET /api/workflow-status`
 
+## Integration Status
+
+- [x] Merge Person 2 backend bridge into `main`.
+- [x] Merge Person 1 AWS workflow into `main`.
+- [x] Keep the Next.js app functional after both merges.
+- [x] Start Step Functions executions from server-side Next.js API routes.
+- [x] Poll Step Functions status from the Start Memory flow and open the finished card when ready.
+- [x] Store memory cards through DynamoDB when AWS env vars are configured.
+- [x] Generate S3 presigned upload URLs without exposing AWS secrets to the browser.
+- [x] Preserve local mock mode when AWS env vars are missing.
+- [x] Add SAM workflow files under `aws-workflow/`.
+- [x] Make the workflow `saveMemoryResult` Lambda persist MemoryCard-shaped results to DynamoDB.
+- [ ] Replace mock AI with Bedrock.
+- [ ] Add profile-first data model and profile pages.
+- [ ] Add real media tabs for photos, audio, and video.
+- [ ] Add Cognito authentication.
+- [ ] Add production-grade media processing for thumbnails, transcripts, and video.
+
 ## Person 2 Backend Integration
 
 This branch adds the secure API/data bridge for the Serverless with Lambda track.
@@ -106,9 +124,10 @@ The script creates/verifies:
 ## Future Improvements
 
 - Add Cognito authentication and per-family archives.
-- Store uploaded media in S3 with signed upload URLs.
-- Persist memory cards in DynamoDB.
+- Expand uploaded media flows beyond presigned URL generation.
+- Add profile-first archives where memories are grouped under loved ones.
 - Replace mock AI with Bedrock prompts and guardrails.
 - Add real Transcribe job polling and transcript correction.
+- Add photo and video thumbnail generation Lambdas.
 - Generate shareable PDF/audio keepsake bundles.
 - Add family collaboration and multilingual review flows.

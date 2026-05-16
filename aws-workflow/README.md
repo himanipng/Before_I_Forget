@@ -26,7 +26,7 @@ The final output includes:
   "translatedText": "...",
   "memoryCard": {},
   "gratitudeLetter": "...",
-  "status": "COMPLETED"
+  "status": "SUCCEEDED"
 }
 ```
 
@@ -38,7 +38,7 @@ Each Lambda receives these environment values:
 - `STEP_FUNCTION_ARN`, configured in `template.yaml`
 - `MEMORY_TABLE_NAME`, configured in `template.yaml`
 
-`MEMORY_TABLE_NAME` points to the existing `BeforeIForgetMemories` DynamoDB table used by the Next.js backend bridge on `main`. The current mock `saveMemoryResult` Lambda returns the final JSON only and does not persist data yet.
+`MEMORY_TABLE_NAME` points to the existing `BeforeIForgetMemories` DynamoDB table used by the Next.js backend bridge on `main`. The `saveMemoryResult` Lambda writes the final MemoryCard-shaped result to DynamoDB using `memoryId` as the table key, then returns the same payload as the Step Functions output.
 
 ## Deploy
 
@@ -73,4 +73,4 @@ After deploy completes, SAM prints the `MemoryWorkflowArn` output. You can also 
 ```
 
 6. Start the execution and wait for it to finish.
-7. Open the execution output. It should contain `sessionId`, `transcript`, `translatedText`, `memoryCard`, `gratitudeLetter`, and `"status": "COMPLETED"`.
+7. Open the execution output. It should contain `sessionId`, `transcript`, `translatedText`, `memoryCard`, `gratitudeLetter`, and `"status": "SUCCEEDED"`.
