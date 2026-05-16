@@ -10,23 +10,32 @@ export async function POST(request: Request) {
   const language = body.language;
 
   if (fileKey || mediaUri) {
-    const job = await startMemoryTranscriptionJob({
-      fileName,
-      fileKey,
-      mediaUri,
-      language,
-      identifyLanguage: body.identifyLanguage !== false,
-    });
+    try {
+      const job = await startMemoryTranscriptionJob({
+        fileName,
+        fileKey,
+        mediaUri,
+        language,
+        identifyLanguage: body.identifyLanguage !== false,
+      });
 
-    if (job) {
+      if (job) {
+        return NextResponse.json({
+          transcript: "",
+          provider: "aws-transcribe",
+          mode: "async",
+          jobName: job.jobName,
+          status: job.status,
+          mediaUri: job.mediaUri,
+        });
+      }
+    } catch (error) {
       return NextResponse.json({
-        transcript: "",
-        provider: "aws-transcribe",
-        mode: "async",
-        jobName: job.jobName,
-        status: job.status,
-        mediaUri: job.mediaUri,
-        outputKey: job.outputKey,
+        transcript: simulateTranscript(fileName),
+        provider: "mock-transcribe",
+        mode: "mock",
+        status: "COMPLETED",
+        warning: error instanceof Error ? error.message : "Amazon Transcribe was unavailable, so the demo used a mock transcript.",
       });
     }
   }
@@ -48,7 +57,19 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "jobName is required." }, { status: 400 });
   }
 
-  const job = await getMemoryTranscriptionJob(jobName);
+  let job;
+
+  try {
+    job = await getMemoryTranscriptionJob(jobName);
+  } catch (error) {
+    return NextResponse.json({
+      provider: "mock-transcribe",
+      mode: "mock",
+      status: "COMPLETED",
+      transcript: simulateTranscript(jobName),
+      warning: error instanceof Error ? error.message : "Amazon Transcribe status was unavailable, so the demo used a mock transcript.",
+    });
+  }
 
   if (!job) {
     return NextResponse.json({

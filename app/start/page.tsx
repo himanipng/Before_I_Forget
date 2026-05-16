@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Globe2 } from "lucide-react";
+import { ArrowRight, Globe2, Mic } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { getWorkflowStatus, startMemory } from "@/lib/api";
 import type { Goal, Language, MemoryCard, MemoryType, Relationship } from "@/lib/types";
@@ -27,6 +27,32 @@ export default function StartPage() {
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const [error, setError] = useState("");
+
+  async function startInterview() {
+    setLoading(true);
+    setStatusMessage("Generating gentle interview questions...");
+    setError("");
+
+    try {
+      const response = await fetch("/api/start-interview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to generate interview questions.");
+      }
+
+      localStorage.setItem("beforeIForget.session", JSON.stringify({ ...form, questions: data.questions || [] }));
+      router.push("/interview");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Unable to start the interview.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -121,6 +147,14 @@ export default function StartPage() {
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
               <button disabled={loading} className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-rose-900 px-6 py-4 font-semibold text-white shadow-lg shadow-rose-950/15 transition hover:bg-rose-950 disabled:opacity-60 sm:w-auto">
                 {loading ? "Starting memory..." : "Start memory workflow"} <ArrowRight size={18} />
+              </button>
+              <button
+                type="button"
+                onClick={startInterview}
+                disabled={loading}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-4 font-semibold text-rose-950 shadow-sm ring-1 ring-rose-900/15 transition hover:bg-rose-50 disabled:opacity-60 sm:w-auto"
+              >
+                Record or transcribe audio <Mic size={18} />
               </button>
               {loading && statusMessage ? <p className="text-sm font-medium text-stone-600">{statusMessage}</p> : null}
             </div>

@@ -66,8 +66,6 @@ export async function startMemoryTranscriptionJob({
     TranscriptionJobName: jobName,
     Media: { MediaFileUri: mediaUri || (fileKey ? s3UriForKey(fileKey) : undefined) },
     MediaFormat: inferMediaFormat(fileName || fileKey),
-    OutputBucketName: env.S3_BUCKET_NAME,
-    OutputKey: `transcripts/${jobName}.json`,
     ...(identifyLanguage
       ? { IdentifyLanguage: true, LanguageOptions: likelyLanguages }
       : { LanguageCode: knownLanguage || ((env.TRANSCRIBE_LANGUAGE_CODE || "en-US") as LanguageCode) }),
@@ -79,7 +77,6 @@ export async function startMemoryTranscriptionJob({
     jobName,
     status: response.TranscriptionJob?.TranscriptionJobStatus || "IN_PROGRESS",
     mediaUri: mediaUri || (fileKey ? s3UriForKey(fileKey) : undefined),
-    outputKey: `transcripts/${jobName}.json`,
   };
 }
 

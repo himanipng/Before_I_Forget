@@ -11,7 +11,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ translatedText: "", sourceLanguage: sourceLanguage || "auto", targetLanguage: safeTarget });
   }
 
-  const awsResponse = await translateText(safeText, sourceLanguage || "auto", safeTarget);
+  let awsResponse;
+
+  try {
+    awsResponse = await translateText(safeText, sourceLanguage || "auto", safeTarget);
+  } catch (error) {
+    return NextResponse.json({
+      translatedText: mockTranslate(safeText, safeTarget),
+      sourceLanguage: sourceLanguage || "auto",
+      targetLanguage: safeTarget,
+      provider: "mock-translate",
+      warning: error instanceof Error ? error.message : "AWS Translate was unavailable, so the demo used mock translation.",
+    });
+  }
 
   if (awsResponse?.TranslatedText) {
     return NextResponse.json({
