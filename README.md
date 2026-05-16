@@ -18,6 +18,28 @@ Many families carry their most important history in voice notes, recipes, repeat
 - **API Gateway/Lambda style**: each `app/api/*/route.ts` is structured as a serverless handler boundary.
 - **Cognito-ready auth placeholder**: the demo does not require login, but the data model is ready for user/session ownership.
 
+## Serverless With Lambda Focus
+
+The judging story is Lambda-first: the frontend starts a secure server-side request, Step Functions orchestrates the workflow, and seven Lambda functions transform a raw family memory into a saved keepsake.
+
+Live Step Functions ARN:
+
+```text
+arn:aws:states:us-west-2:085193942503:stateMachine:before-i-forget-memory-workflow
+```
+
+Lambda functions in `aws-workflow/lambdas/`:
+
+- `createMemorySession`
+- `processStoryInput`
+- `generateTranscriptMock`
+- `translateMemoryMock`
+- `generateMemoryCardMock`
+- `generateGratitudeLetterMock`
+- `saveMemoryResult`
+
+The final Lambda writes a MemoryCard-shaped result to DynamoDB. The Next.js `/api/workflow-status` route reads Step Functions completion and the Start Memory page opens the finished card when the workflow succeeds.
+
 ## Bedrock Later
 
 Amazon Bedrock will replace the local mock AI layer in `lib/mockAI.ts` for:
@@ -47,7 +69,8 @@ Copy `.env.example` to `.env.local` when connecting real AWS services.
 5. Generate memory card
 6. Show gratitude letter
 7. Show architecture page
-8. Explain that Bedrock replaces the mock emotional AI layer
+8. Open `aws-workflow/` and point to the seven Lambda functions
+9. Explain that Bedrock replaces the mock emotional AI layer
 
 ## API Routes
 

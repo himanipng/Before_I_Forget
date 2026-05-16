@@ -1,6 +1,6 @@
 # Before I Forget AWS Workflow
 
-This folder contains an AWS SAM serverless backend for the Before I Forget hackathon project. It uses AWS Step Functions to orchestrate mocked Lambda steps for turning a personal story into a transcript, translation, memory card, and gratitude letter.
+This folder contains the Lambda-centered AWS SAM backend for the Before I Forget hackathon project. It uses AWS Step Functions to orchestrate Lambda steps for turning a personal story into a transcript, translation, memory card, and gratitude letter.
 
 No Bedrock or external AI service is used. All AI-like outputs are deterministic mock responses.
 
@@ -15,6 +15,20 @@ The Step Functions state machine runs these Lambda functions in order:
 5. `generateMemoryCardMock`
 6. `generateGratitudeLetterMock`
 7. `saveMemoryResult`
+
+Live Step Functions ARN used by the Vercel app:
+
+```text
+arn:aws:states:us-west-2:085193942503:stateMachine:before-i-forget-memory-workflow
+```
+
+Why this is a Lambda-track project:
+
+- The user-facing memory flow is decomposed into independently deployable Lambda functions.
+- Step Functions gives judges a visible execution graph for the story workflow.
+- DynamoDB persistence happens in the final Lambda, not in the browser.
+- Mock AI is isolated inside Lambda boundaries so Bedrock can replace it without redesigning the frontend.
+- S3 presigned uploads keep large files out of Lambda while still using Lambda/API routes for secure control.
 
 The final output includes:
 
