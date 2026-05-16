@@ -1,13 +1,24 @@
 import { NextResponse } from "next/server";
 import { saveMemory } from "@/lib/storage";
-import type { MemoryCardData } from "@/lib/types";
+import type { ApiResponse, MemoryCard } from "@/lib/types";
 
 export async function POST(request: Request) {
-  const memory = (await request.json()) as MemoryCardData;
-  const saved = await saveMemory({
-    ...memory,
-    id: memory.id || crypto.randomUUID(),
-    createdAt: memory.createdAt || new Date().toISOString(),
-  });
-  return NextResponse.json({ memory: saved });
+  try {
+    const memory = (await request.json()) as MemoryCard;
+
+    if (!memory.memoryId || !memory.title || !memory.personName) {
+      return NextResponse.json<ApiResponse<never>>(
+        { success: false, error: "Memory card is missing required fields." },
+        { status: 400 },
+      );
+    }
+
+    const saved = await saveMemory(memory);
+    return NextResponse.json<ApiResponse<MemoryCard>>({ success: true, data: saved });
+  } catch (error) {
+    return NextResponse.json<ApiResponse<never>>(
+      { success: false, error: error instanceof Error ? error.message : "Unable to save memory." },
+      { status: 500 },
+    );
+  }
 }

@@ -32,20 +32,23 @@ export type Language =
   | "French"
   | "other";
 
-export type StartInterviewInput = {
-  personName?: string;
+export type MemoryStatus = "PENDING" | "RUNNING" | "SUCCEEDED" | "FAILED" | "MOCK";
+
+export type MemoryInput = {
+  personName: string;
   relationship: Relationship;
   country: string;
   language: Language;
   memoryType: MemoryType;
-  goal: Goal;
+  storyText: string;
+  goal?: Goal;
 };
 
-export type MemoryCardData = {
-  id: string;
+export type MemoryCard = {
+  memoryId: string;
   personName: string;
   relationship: Relationship;
-  country?: string;
+  country: string;
   language: Language;
   memoryType: MemoryType;
   title: string;
@@ -55,9 +58,25 @@ export type MemoryCardData = {
   culturalContext: string;
   followUpQuestion: string;
   gratitudeLetter: string;
+  createdAt: string;
+  status: MemoryStatus;
   translatedText?: string;
   audioUrl?: string;
-  createdAt: string;
+};
+
+export type ApiResponse<T> = {
+  success: boolean;
+  data?: T;
+  error?: string;
+};
+
+export type StartInterviewInput = {
+  personName?: string;
+  relationship: Relationship;
+  country: string;
+  language: Language;
+  memoryType: MemoryType;
+  goal: Goal;
 };
 
 export type GenerateMemoryCardInput = {
@@ -67,4 +86,10 @@ export type GenerateMemoryCardInput = {
   language: Language;
   memoryType: MemoryType;
   country?: string;
+};
+
+export type MemoryCardData = MemoryCard & {
+  id?: string;
+  goal?: Goal;
+  questions?: string[];
 };

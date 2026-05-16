@@ -8,6 +8,7 @@ import type { MemoryCardData } from "@/lib/types";
 
 const previewMemory: MemoryCardData = {
   id: "preview",
+  memoryId: "preview",
   personName: "Nani",
   relationship: "grandparent",
   country: "India",
@@ -24,6 +25,7 @@ const previewMemory: MemoryCardData = {
   gratitudeLetter:
     "I do not think I realized back then how much those mornings meant. Thank you for every cup and every quiet way you loved us.",
   createdAt: new Date().toISOString(),
+  status: "MOCK",
 };
 
 export default function Home() {
