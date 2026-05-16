@@ -30,7 +30,24 @@ export async function getWorkflowStatus(executionArn?: string) {
   const sfnClient = getSFNClient();
 
   if (hasStepFunctionConfig && sfnClient && executionArn) {
-    const result = await sfnClient.send(new DescribeExecutionCommand({ executionArn }));
+    let result;
+
+    try {
+      result = await sfnClient.send(new DescribeExecutionCommand({ executionArn }));
+    } catch (error) {
+      if (error instanceof Error && error.name === "AccessDeniedException") {
+        return {
+          status: "RUNNING",
+          output: undefined,
+          mock: false,
+          warning:
+            "Step Functions execution started, but the Vercel IAM user still needs states:DescribeExecution on execution ARNs.",
+        };
+      }
+
+      throw error;
+    }
+
     return {
       status: result.status,
       output: result.output ? JSON.parse(result.output) : undefined,

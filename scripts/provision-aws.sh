@@ -8,6 +8,7 @@ TABLE_NAME="${DYNAMODB_TABLE_NAME:-BeforeIForgetMemories}"
 BUCKET_NAME="${S3_BUCKET_NAME:-before-i-forget-uploads-${AWS_ACCOUNT_ID:-$(aws sts get-caller-identity --query Account --output text)}-${REGION}}"
 USER_NAME="${IAM_USER_NAME:-before-i-forget-vercel-api}"
 POLICY_NAME="${IAM_POLICY_NAME:-BeforeIForgetVercelApiPolicy}"
+STATE_MACHINE_NAME="${STEP_FUNCTION_NAME:-before-i-forget-memory-workflow}"
 
 ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
 BUCKET_NAME="${BUCKET_NAME//_/-}"
@@ -100,10 +101,16 @@ cat > "$POLICY_DOCUMENT" <<JSON
     {
       "Effect": "Allow",
       "Action": [
-        "states:StartExecution",
+        "states:StartExecution"
+      ],
+      "Resource": "arn:aws:states:${REGION}:${ACCOUNT_ID}:stateMachine:${STATE_MACHINE_NAME}"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
         "states:DescribeExecution"
       ],
-      "Resource": "*"
+      "Resource": "arn:aws:states:${REGION}:${ACCOUNT_ID}:execution:${STATE_MACHINE_NAME}:*"
     }
   ]
 }
@@ -142,4 +149,8 @@ Optional public variable:
 NEXT_PUBLIC_API_BASE_URL=
 
 Keep AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY server-only. Do not prefix them with NEXT_PUBLIC_.
+
+Step Functions IAM note:
+states:StartExecution is scoped to arn:aws:states:${REGION}:${ACCOUNT_ID}:stateMachine:${STATE_MACHINE_NAME}
+states:DescribeExecution is scoped to arn:aws:states:${REGION}:${ACCOUNT_ID}:execution:${STATE_MACHINE_NAME}:*
 EOF

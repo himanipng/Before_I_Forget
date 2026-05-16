@@ -147,6 +147,12 @@ The script creates/verifies:
 - IAM user `before-i-forget-vercel-api` with scoped DynamoDB, S3, and Step Functions permissions
 - One access key pair to paste into Vercel environment variables
 
+If Vercel can start a workflow but cannot poll it, rerun the provisioner in AWS CloudShell. Step Functions uses two resource types: `states:StartExecution` applies to the state machine ARN, while `states:DescribeExecution` applies to execution ARNs such as:
+
+```text
+arn:aws:states:us-west-2:085193942503:execution:before-i-forget-memory-workflow:*
+```
+
 ## Future Improvements
 
 - Add Cognito authentication and per-family archives.
