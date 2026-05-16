@@ -2,6 +2,8 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { S3Client } from "@aws-sdk/client-s3";
 import { SFNClient } from "@aws-sdk/client-sfn";
+import { TranscribeClient } from "@aws-sdk/client-transcribe";
+import { TranslateClient } from "@aws-sdk/client-translate";
 import { env, hasAwsConfig } from "@/lib/env";
 
 type AwsCredentials = {
@@ -20,6 +22,8 @@ let dynamoClient: DynamoDBClient | null = null;
 let dynamoDocumentClient: DynamoDBDocumentClient | null = null;
 let s3Client: S3Client | null = null;
 let sfnClient: SFNClient | null = null;
+let transcribeClient: TranscribeClient | null = null;
+let translateClient: TranslateClient | null = null;
 
 export function getDynamoDBClient() {
   if (!hasAwsConfig) return null;
@@ -52,4 +56,20 @@ export function getSFNClient() {
     sfnClient = new SFNClient({ region: env.AWS_REGION, credentials: credentials() });
   }
   return sfnClient;
+}
+
+export function getTranscribeClient() {
+  if (!hasAwsConfig) return null;
+  if (!transcribeClient) {
+    transcribeClient = new TranscribeClient({ region: env.AWS_REGION, credentials: credentials() });
+  }
+  return transcribeClient;
+}
+
+export function getTranslateClient() {
+  if (!hasAwsConfig) return null;
+  if (!translateClient) {
+    translateClient = new TranslateClient({ region: env.AWS_REGION, credentials: credentials() });
+  }
+  return translateClient;
 }

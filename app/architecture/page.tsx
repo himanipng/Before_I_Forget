@@ -17,6 +17,8 @@ const implemented = [
   "Seven Lambda functions form the story keepsake pipeline.",
   "DynamoDB stores generated memory results by memoryId.",
   "S3 presigned upload helper keeps media bytes out of Lambda.",
+  "Transcribe starts from S3 audio uploads for voice notes and phone-call recordings.",
+  "Translate can call AWS Translate for multilingual memory cards.",
   "Mock AI is isolated so Bedrock can replace it later.",
 ];
 

@@ -39,6 +39,20 @@ aws s3api put-public-access-block \
   --bucket "$BUCKET_NAME" \
   --public-access-block-configuration BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
 
+aws s3api put-bucket-cors \
+  --bucket "$BUCKET_NAME" \
+  --cors-configuration '{
+    "CORSRules": [
+      {
+        "AllowedHeaders": ["*"],
+        "AllowedMethods": ["PUT", "GET", "HEAD"],
+        "AllowedOrigins": ["*"],
+        "ExposeHeaders": ["ETag"],
+        "MaxAgeSeconds": 3000
+      }
+    ]
+  }'
+
 if ! aws iam get-user --user-name "$USER_NAME" >/dev/null 2>&1; then
   aws iam create-user --user-name "$USER_NAME" >/dev/null
 fi
@@ -63,7 +77,25 @@ cat > "$POLICY_DOCUMENT" <<JSON
         "s3:PutObject",
         "s3:GetObject"
       ],
-      "Resource": "arn:aws:s3:::${BUCKET_NAME}/uploads/*"
+      "Resource": [
+        "arn:aws:s3:::${BUCKET_NAME}/uploads/*",
+        "arn:aws:s3:::${BUCKET_NAME}/transcripts/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "transcribe:StartTranscriptionJob",
+        "transcribe:GetTranscriptionJob"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "translate:TranslateText"
+      ],
+      "Resource": "*"
     },
     {
       "Effect": "Allow",

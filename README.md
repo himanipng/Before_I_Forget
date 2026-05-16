@@ -98,6 +98,9 @@ Copy `.env.example` to `.env.local` when connecting real AWS services.
 - [x] Preserve local mock mode when AWS env vars are missing.
 - [x] Add SAM workflow files under `aws-workflow/`.
 - [x] Make the workflow `saveMemoryResult` Lambda persist MemoryCard-shaped results to DynamoDB.
+- [x] Add AWS Translate-backed `/api/translate` with mock fallback.
+- [x] Add AWS Transcribe-backed `/api/transcribe` for S3 audio files with mock fallback.
+- [x] Add browser recording/upload UI for voice notes and forwarded phone-call audio.
 - [ ] Replace mock AI with Bedrock.
 - [ ] Add profile-first data model and profile pages.
 - [ ] Add real media tabs for photos, audio, and video.
@@ -150,7 +153,7 @@ The script creates/verifies:
 - Expand uploaded media flows beyond presigned URL generation.
 - Add profile-first archives where memories are grouped under loved ones.
 - Replace mock AI with Bedrock prompts and guardrails.
-- Add real Transcribe job polling and transcript correction.
+- Add transcript correction and richer async status UI for longer Transcribe jobs.
 - Add photo and video thumbnail generation Lambdas.
 - Generate shareable PDF/audio keepsake bundles.
 - Add family collaboration and multilingual review flows.
