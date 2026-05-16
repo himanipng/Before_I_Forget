@@ -51,6 +51,7 @@ Copy `.env.example` to `.env.local` when connecting real AWS services.
 
 ## API Routes
 
+- `POST /api/start-memory`
 - `POST /api/start-interview`
 - `POST /api/transcribe`
 - `POST /api/translate`
@@ -58,6 +59,49 @@ Copy `.env.example` to `.env.local` when connecting real AWS services.
 - `POST /api/polly`
 - `POST /api/save-memory`
 - `GET /api/memories`
+- `GET /api/memories/[id]`
+- `POST /api/upload-url`
+- `GET /api/workflow-status`
+
+## Person 2 Backend Integration
+
+This branch adds the secure API/data bridge for the Serverless with Lambda track.
+
+- Vercel hosts the Next.js frontend.
+- Next.js API routes in `app/api` act as the secure server-side bridge between the frontend and AWS.
+- AWS credentials are read only from server-side environment variables. They are never placed in client components and are never prefixed with `NEXT_PUBLIC_`.
+- DynamoDB stores generated memory cards with `memoryId` as the primary key.
+- S3 stores uploaded audio, photo, and memory files through server-generated presigned upload URLs.
+- Step Functions starts Person 1's Lambda workflow through `StartExecutionCommand`.
+- `GET /api/workflow-status` can read workflow state through `DescribeExecutionCommand`.
+- If AWS environment variables are missing, the app automatically runs in mock mode so the hackathon demo remains safe and reliable.
+
+Required Vercel environment variables:
+
+```bash
+AWS_REGION=us-west-2
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+S3_BUCKET_NAME=before-i-forget-uploads
+DYNAMODB_TABLE_NAME=BeforeIForgetMemories
+STEP_FUNCTION_ARN=
+NEXT_PUBLIC_API_BASE_URL=
+```
+
+`NEXT_PUBLIC_API_BASE_URL` is optional. Keep all AWS variables server-only.
+
+To provision the AWS resources from an authenticated AWS CloudShell session:
+
+```bash
+./scripts/provision-aws.sh
+```
+
+The script creates/verifies:
+
+- DynamoDB table `BeforeIForgetMemories` with `memoryId` as the partition key
+- Private S3 upload bucket
+- IAM user `before-i-forget-vercel-api` with scoped DynamoDB, S3, and Step Functions permissions
+- One access key pair to paste into Vercel environment variables
 
 ## Future Improvements
 
