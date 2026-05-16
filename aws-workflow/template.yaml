@@ -1,0 +1,97 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Serverless memory workflow for the Before I Forget hackathon project.
+
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    Timeout: 10
+    MemorySize: 128
+    Environment:
+      Variables:
+        STEP_FUNCTION_ARN: !Sub arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:stateMachine:before-i-forget-memory-workflow
+        MEMORY_TABLE_NAME: BeforeIForgetMemories
+
+Resources:
+  CreateMemorySessionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: lambdas/createMemorySession/
+
+  ProcessStoryInputFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: lambdas/processStoryInput/
+
+  GenerateTranscriptMockFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: lambdas/generateTranscriptMock/
+
+  TranslateMemoryMockFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: lambdas/translateMemoryMock/
+
+  GenerateMemoryCardMockFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: lambdas/generateMemoryCardMock/
+
+  GenerateGratitudeLetterMockFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: lambdas/generateGratitudeLetterMock/
+
+  SaveMemoryResultFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: lambdas/saveMemoryResult/
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: BeforeIForgetMemories
+
+  MemoryWorkflow:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      Name: before-i-forget-memory-workflow
+      DefinitionUri: statemachine/memoryWorkflow.asl.json
+      DefinitionSubstitutions:
+        CreateMemorySessionFunctionArn: !GetAtt CreateMemorySessionFunction.Arn
+        ProcessStoryInputFunctionArn: !GetAtt ProcessStoryInputFunction.Arn
+        GenerateTranscriptMockFunctionArn: !GetAtt GenerateTranscriptMockFunction.Arn
+        TranslateMemoryMockFunctionArn: !GetAtt TranslateMemoryMockFunction.Arn
+        GenerateMemoryCardMockFunctionArn: !GetAtt GenerateMemoryCardMockFunction.Arn
+        GenerateGratitudeLetterMockFunctionArn: !GetAtt GenerateGratitudeLetterMockFunction.Arn
+        SaveMemoryResultFunctionArn: !GetAtt SaveMemoryResultFunction.Arn
+      Policies:
+        - LambdaInvokePolicy:
+            FunctionName: !Ref CreateMemorySessionFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref ProcessStoryInputFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref GenerateTranscriptMockFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref TranslateMemoryMockFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref GenerateMemoryCardMockFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref GenerateGratitudeLetterMockFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref SaveMemoryResultFunction
+
+Outputs:
+  MemoryWorkflowArn:
+    Description: ARN of the Before I Forget Step Functions workflow.
+    Value: !Ref MemoryWorkflow
+
+  MemoryTableName:
+    Description: Existing DynamoDB table name used by the workflow.
+    Value: BeforeIForgetMemories

@@ -1,0 +1,41 @@
+{
+  "Comment": "Before I Forget mocked memory workflow.",
+  "StartAt": "createMemorySession",
+  "States": {
+    "createMemorySession": {
+      "Type": "Task",
+      "Resource": "${CreateMemorySessionFunctionArn}",
+      "Next": "processStoryInput"
+    },
+    "processStoryInput": {
+      "Type": "Task",
+      "Resource": "${ProcessStoryInputFunctionArn}",
+      "Next": "generateTranscriptMock"
+    },
+    "generateTranscriptMock": {
+      "Type": "Task",
+      "Resource": "${GenerateTranscriptMockFunctionArn}",
+      "Next": "translateMemoryMock"
+    },
+    "translateMemoryMock": {
+      "Type": "Task",
+      "Resource": "${TranslateMemoryMockFunctionArn}",
+      "Next": "generateMemoryCardMock"
+    },
+    "generateMemoryCardMock": {
+      "Type": "Task",
+      "Resource": "${GenerateMemoryCardMockFunctionArn}",
+      "Next": "generateGratitudeLetterMock"
+    },
+    "generateGratitudeLetterMock": {
+      "Type": "Task",
+      "Resource": "${GenerateGratitudeLetterMockFunctionArn}",
+      "Next": "saveMemoryResult"
+    },
+    "saveMemoryResult": {
+      "Type": "Task",
+      "Resource": "${SaveMemoryResultFunctionArn}",
+      "End": true
+    }
+  }
+}
