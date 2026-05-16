@@ -21,6 +21,7 @@ The final output includes:
 ```json
 {
   "sessionId": "nani-1234567890",
+  "memoryId": "nani-1234567890",
   "transcript": "...",
   "translatedText": "...",
   "memoryCard": {},
@@ -37,7 +38,7 @@ Each Lambda receives these environment values:
 - `STEP_FUNCTION_ARN`, configured in `template.yaml`
 - `MEMORY_TABLE_NAME`, configured in `template.yaml`
 
-`MEMORY_TABLE_NAME` points to a simple DynamoDB table provisioned by SAM. The current mock `saveMemoryResult` Lambda returns the final JSON only and does not persist data yet.
+`MEMORY_TABLE_NAME` points to the existing `BeforeIForgetMemories` DynamoDB table used by the Next.js backend bridge on `main`. The current mock `saveMemoryResult` Lambda returns the final JSON only and does not persist data yet.
 
 ## Deploy
 

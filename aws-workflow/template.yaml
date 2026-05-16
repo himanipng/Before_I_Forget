@@ -10,16 +10,9 @@ Globals:
     Environment:
       Variables:
         STEP_FUNCTION_ARN: !Sub arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:stateMachine:before-i-forget-memory-workflow
-        MEMORY_TABLE_NAME: !Ref MemoryTable
+        MEMORY_TABLE_NAME: BeforeIForgetMemories
 
 Resources:
-  MemoryTable:
-    Type: AWS::Serverless::SimpleTable
-    Properties:
-      PrimaryKey:
-        Name: sessionId
-        Type: String
-
   CreateMemorySessionFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -61,6 +54,9 @@ Resources:
     Properties:
       Handler: index.handler
       CodeUri: lambdas/saveMemoryResult/
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: BeforeIForgetMemories
 
   MemoryWorkflow:
     Type: AWS::Serverless::StateMachine
@@ -95,6 +91,7 @@ Outputs:
   MemoryWorkflowArn:
     Description: ARN of the Before I Forget Step Functions workflow.
     Value: !Ref MemoryWorkflow
+
   MemoryTableName:
-    Description: DynamoDB table name used by the workflow.
-    Value: !Ref MemoryTable
+    Description: Existing DynamoDB table name used by the workflow.
+    Value: BeforeIForgetMemories
