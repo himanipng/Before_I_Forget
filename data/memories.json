@@ -1,0 +1,27 @@
+[
+  {
+    "personName": "Nani",
+    "relationship": "grandparent",
+    "country": "India",
+    "language": "Hindi",
+    "memoryType": "recipe",
+    "goal": "preserve story",
+    "questions": [
+      "When you think of Nani in India, what is the first small scene that comes back to you?",
+      "What did Nani teach you through this recipe, even if they never said it directly?",
+      "What smell, sound, food, phrase, or routine belongs inside this memory?",
+      "Was there a hard or tender moment behind this story that younger family members might not know?",
+      "If you could ask one more question about the part of the story that should stay in the family, what would you ask?"
+    ],
+    "id": "7ab386a7-78ce-4eb4-a8c2-0db1ce21dbbd",
+    "title": "The Mornings She Made Warm",
+    "summary": "Every morning, she made chai before school, not just as a drink, but as a quiet way of saying you were cared for. The recipe held ginger, milk, patience, and the kind of love that arrives before anyone asks for it.",
+    "quote": "She made chai every morning before school.",
+    "lesson": "Care is often shown through small routines, repeated until they become home.",
+    "culturalContext": "In many families connected to India, chai is more than a recipe. It is a morning rhythm, a welcome, a pause, and a way of carrying tenderness across generations.",
+    "followUpQuestion": "What did she put in the chai that made it taste like hers, and who taught her to make it that way?",
+    "gratitudeLetter": "Dear Nani, I do not think I realized back then how much those mornings meant. I thought you were only making chai, but now I understand you were making the day feel safe before it began. Thank you for every cup, every early morning, and every quiet way you loved us without asking to be noticed.",
+    "createdAt": "2026-05-16T17:28:08.970Z",
+    "audioUrl": "/audio/mock-letter-Joanna.mp3"
+  }
+]
