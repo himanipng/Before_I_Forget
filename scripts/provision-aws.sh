@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REGION="${AWS_REGION:-us-west-2}"
+# CloudShell often sets AWS_REGION to the console's selected region. Keep this
+# project's infrastructure in us-west-2 unless we explicitly override it.
+REGION="${BEFORE_I_FORGET_AWS_REGION:-us-west-2}"
 TABLE_NAME="${DYNAMODB_TABLE_NAME:-BeforeIForgetMemories}"
 BUCKET_NAME="${S3_BUCKET_NAME:-before-i-forget-uploads-${AWS_ACCOUNT_ID:-$(aws sts get-caller-identity --query Account --output text)}-${REGION}}"
 USER_NAME="${IAM_USER_NAME:-before-i-forget-vercel-api}"
@@ -80,7 +82,16 @@ aws iam put-user-policy \
   --policy-name "$POLICY_NAME" \
   --policy-document "file://${POLICY_DOCUMENT}" >/dev/null
 
-ACCESS_KEY_JSON="$(aws iam create-access-key --user-name "$USER_NAME")"
+EXISTING_ACCESS_KEY_ID="$(aws iam list-access-keys --user-name "$USER_NAME" --query 'AccessKeyMetadata[0].AccessKeyId' --output text)"
+
+if [ "$EXISTING_ACCESS_KEY_ID" = "None" ]; then
+  ACCESS_KEY_JSON="$(aws iam create-access-key --user-name "$USER_NAME")"
+  ACCESS_KEY_ID="$(echo "$ACCESS_KEY_JSON" | jq -r '.AccessKey.AccessKeyId')"
+  ACCESS_KEY_SECRET="$(echo "$ACCESS_KEY_JSON" | jq -r '.AccessKey.SecretAccessKey')"
+else
+  ACCESS_KEY_ID="$EXISTING_ACCESS_KEY_ID"
+  ACCESS_KEY_SECRET="<use the existing secret for this access key or rotate the key>"
+fi
 
 cat <<EOF
 
@@ -89,8 +100,8 @@ Created/verified AWS resources.
 Add these Vercel server-side environment variables:
 
 AWS_REGION=${REGION}
-AWS_ACCESS_KEY_ID=$(echo "$ACCESS_KEY_JSON" | jq -r '.AccessKey.AccessKeyId')
-AWS_SECRET_ACCESS_KEY=$(echo "$ACCESS_KEY_JSON" | jq -r '.AccessKey.SecretAccessKey')
+AWS_ACCESS_KEY_ID=${ACCESS_KEY_ID}
+AWS_SECRET_ACCESS_KEY=${ACCESS_KEY_SECRET}
 S3_BUCKET_NAME=${BUCKET_NAME}
 DYNAMODB_TABLE_NAME=${TABLE_NAME}
 STEP_FUNCTION_ARN=<paste Person 1 Step Functions state machine ARN>
