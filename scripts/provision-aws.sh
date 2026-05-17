@@ -106,7 +106,9 @@ cat > "$POLICY_DOCUMENT" <<JSON
     {
       "Effect": "Allow",
       "Action": [
-        "bedrock:InvokeModel"
+        "bedrock:InvokeModel",
+        "aws-marketplace:ViewSubscriptions",
+        "aws-marketplace:Subscribe"
       ],
       "Resource": "*"
     },
