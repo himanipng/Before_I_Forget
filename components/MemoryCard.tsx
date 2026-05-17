@@ -9,14 +9,14 @@ type Props = {
 export function MemoryCard({ memory, actions }: Props) {
   return (
     <article className="overflow-hidden rounded-[2rem] border border-rose-900/10 bg-white shadow-xl shadow-rose-950/8">
-      <div className="bg-[linear-gradient(135deg,#5b1f22,#a55344_52%,#f0b36f)] p-6 text-white sm:p-8">
+      <div className="bg-[linear-gradient(135deg,#fff8f1,#f4d6ca_55%,#f0b36f)] p-6 text-stone-950 sm:p-8">
         <div className="flex flex-wrap items-center gap-2 text-sm">
-          <span className="rounded-full bg-white/16 px-3 py-1">{memory.relationship}</span>
-          <span className="rounded-full bg-white/16 px-3 py-1">{memory.memoryType}</span>
-          <span className="rounded-full bg-white/16 px-3 py-1">{memory.language}</span>
+          <span className="rounded-full bg-white/70 px-3 py-1 text-rose-950 ring-1 ring-rose-900/10">{memory.relationship}</span>
+          <span className="rounded-full bg-white/70 px-3 py-1 text-rose-950 ring-1 ring-rose-900/10">{memory.memoryType}</span>
+          <span className="rounded-full bg-white/70 px-3 py-1 text-rose-950 ring-1 ring-rose-900/10">{memory.language}</span>
         </div>
         <h1 className="mt-6 max-w-3xl text-4xl font-semibold leading-tight sm:text-5xl">{memory.title}</h1>
-        <p className="mt-4 flex items-center gap-2 text-rose-50/85">
+        <p className="mt-4 flex items-center gap-2 text-stone-700">
           <MapPin size={17} /> {memory.personName}{memory.country ? `, ${memory.country}` : ""}
         </p>
       </div>
@@ -48,9 +48,9 @@ export function MemoryCard({ memory, actions }: Props) {
             </Block>
           ) : null}
           {memory.audioUrl ? (
-            <div className="rounded-3xl bg-stone-950 p-4 text-white">
-              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-rose-100/70">Audio keepsake</p>
-              <p className="mt-2 text-sm text-rose-50/80">{memory.audioUrl}</p>
+            <div className="rounded-3xl bg-rose-50 p-4 text-stone-950 ring-1 ring-rose-900/10">
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-rose-900">Audio keepsake</p>
+              <p className="mt-2 text-sm text-stone-600">{memory.audioUrl}</p>
             </div>
           ) : null}
           {actions}

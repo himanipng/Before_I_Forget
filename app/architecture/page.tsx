@@ -38,9 +38,9 @@ export default function ArchitecturePage() {
             and the final keepsake is stored in DynamoDB.
           </p>
           <div className="mt-6 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="rounded-[2rem] bg-rose-950 p-6 text-white shadow-xl shadow-rose-950/15">
-              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-rose-100">Live workflow ARN</p>
-              <p className="mt-3 break-all font-mono text-sm leading-7 text-rose-50">
+            <div className="rounded-[2rem] bg-white/90 p-6 text-stone-950 shadow-sm ring-1 ring-rose-900/10">
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-rose-900">Live workflow ARN</p>
+              <p className="mt-3 break-all font-mono text-sm leading-7 text-stone-700">
                 arn:aws:states:us-west-2:085193942503:stateMachine:before-i-forget-memory-workflow
               </p>
             </div>
@@ -76,8 +76,8 @@ export default function ArchitecturePage() {
                   </li>
                 ))}
               </ul>
-              <div className="mt-6 rounded-2xl bg-stone-950 p-5 text-white">
-                <p className="text-lg leading-8">
+              <div className="mt-6 rounded-2xl bg-rose-50 p-5 text-stone-950 ring-1 ring-rose-900/10">
+                <p className="text-lg leading-8 text-stone-700">
                   Bedrock will replace the mock AI layer for interview generation, emotional summarization, and gratitude-letter generation.
                 </p>
               </div>

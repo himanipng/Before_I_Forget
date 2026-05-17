@@ -95,17 +95,17 @@ export default function InterviewPage() {
       <Navbar />
       <main className="min-h-screen bg-[#fffaf5] px-4 py-10 sm:px-6">
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.7fr_1.3fr]">
-          <aside className="h-fit rounded-[2rem] bg-stone-950 p-6 text-white shadow-xl shadow-stone-950/10">
-            <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-rose-100/70">
+          <aside className="h-fit rounded-[2rem] bg-white/88 p-6 text-stone-950 shadow-xl shadow-rose-950/8 ring-1 ring-rose-900/10">
+            <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-rose-900">
               <NotebookPen size={16} /> Interview
             </p>
             <h1 className="mt-4 text-4xl font-semibold">{session.personName}</h1>
-            <div className="mt-5 space-y-3 text-sm text-stone-300">
+            <div className="mt-5 space-y-3 text-sm text-stone-600">
               <p>{session.relationship} in {session.country}</p>
               <p>{session.language} · {session.memoryType}</p>
               <p>Goal: {session.goal}</p>
             </div>
-            <div className="mt-8 rounded-3xl bg-white/8 p-5 leading-7 text-rose-50/85">
+            <div className="mt-8 rounded-3xl bg-[#fff8f1] p-5 leading-7 text-stone-700 ring-1 ring-rose-900/10">
               Let the answer be imperfect. The demo will turn fragments into a memory card, but the feeling comes from what you write here.
             </div>
           </aside>
