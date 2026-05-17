@@ -4,6 +4,7 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { SFNClient } from "@aws-sdk/client-sfn";
 import { TranscribeClient } from "@aws-sdk/client-transcribe";
 import { TranslateClient } from "@aws-sdk/client-translate";
+import { BedrockRuntimeClient } from "@aws-sdk/client-bedrock-runtime";
 import { env, hasAwsConfig } from "@/lib/env";
 
 type AwsCredentials = {
@@ -24,6 +25,7 @@ let s3Client: S3Client | null = null;
 let sfnClient: SFNClient | null = null;
 let transcribeClient: TranscribeClient | null = null;
 let translateClient: TranslateClient | null = null;
+let bedrockRuntimeClient: BedrockRuntimeClient | null = null;
 
 export function getDynamoDBClient() {
   if (!hasAwsConfig) return null;
@@ -72,4 +74,12 @@ export function getTranslateClient() {
     translateClient = new TranslateClient({ region: env.AWS_REGION, credentials: credentials() });
   }
   return translateClient;
+}
+
+export function getBedrockRuntimeClient() {
+  if (!hasAwsConfig) return null;
+  if (!bedrockRuntimeClient) {
+    bedrockRuntimeClient = new BedrockRuntimeClient({ region: env.AWS_REGION, credentials: credentials() });
+  }
+  return bedrockRuntimeClient;
 }

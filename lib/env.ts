@@ -5,6 +5,7 @@ const serverEnv = {
   S3_BUCKET_NAME: process.env.S3_BUCKET_NAME || "",
   DYNAMODB_TABLE_NAME: process.env.DYNAMODB_TABLE_NAME || "",
   STEP_FUNCTION_ARN: process.env.STEP_FUNCTION_ARN || "",
+  BEDROCK_MODEL_ID: process.env.BEDROCK_MODEL_ID || "anthropic.claude-3-haiku-20240307-v1:0",
   TRANSCRIBE_LANGUAGE_CODE: process.env.TRANSCRIBE_LANGUAGE_CODE || "",
   POLLY_VOICE_ID: process.env.POLLY_VOICE_ID || "",
   NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || "",
@@ -19,6 +20,7 @@ export const hasAwsConfig = Boolean(
 
 export const hasS3Config = hasAwsConfig && Boolean(serverEnv.S3_BUCKET_NAME);
 export const hasStepFunctionConfig = hasAwsConfig && Boolean(serverEnv.STEP_FUNCTION_ARN);
+export const hasBedrockConfig = hasAwsConfig && Boolean(serverEnv.BEDROCK_MODEL_ID);
 export const hasTranscribeConfig = hasS3Config;
 export const hasTranslateConfig = hasAwsConfig;
 

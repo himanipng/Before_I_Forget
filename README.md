@@ -13,6 +13,7 @@ Many families carry their most important history in voice notes, recipes, repeat
 - **Amazon S3**: upload-ready storage layer for audio, photos, and keepsake files.
 - **Amazon Transcribe**: SDK-ready voice-to-text integration, mocked for local demo.
 - **Amazon Translate**: route contract and SDK-ready translation helper, mocked for local demo.
+- **Amazon Bedrock Claude**: real Claude invocation path for interview questions and memory-card generation, with mock fallback.
 - **Amazon Polly**: route contract and SDK-ready speech synthesis helper, mocked for local demo.
 - **DynamoDB storage**: clean storage abstraction for memory cards and sessions, backed by DynamoDB when AWS env vars exist and local JSON/mock mode for safe demos.
 - **API Gateway/Lambda style**: each `app/api/*/route.ts` is structured as a serverless handler boundary.
@@ -40,16 +41,17 @@ Lambda functions in `aws-workflow/lambdas/`:
 
 The final Lambda writes a MemoryCard-shaped result to DynamoDB. The Next.js `/api/workflow-status` route reads Step Functions completion and the Start Memory page opens the finished card when the workflow succeeds.
 
-## Bedrock Later
+## Bedrock Claude Integration
 
-Amazon Bedrock will replace the local mock AI layer in `lib/mockAI.ts` for:
+Amazon Bedrock now replaces the local mock AI layer when AWS credentials and model access are configured. The app uses `@aws-sdk/client-bedrock-runtime` and the Anthropic Claude Messages payload through `InvokeModelCommand`.
 
-- Interview question generation
-- Emotional summarization
-- Lesson and cultural context extraction
-- Gratitude-letter generation
+Bedrock-backed paths:
 
-The UI and API contracts are already separated so Bedrock can be added without redesigning the demo flow.
+- `POST /api/start-interview` for interview question generation
+- `POST /api/generate-memory-card` for emotional summarization, lesson and cultural context extraction, and gratitude-letter generation
+- `POST /api/start-memory` for the one-click demo memory card
+
+If Bedrock is not configured, model access is not enabled, or the model call fails, the app falls back to the mock AI response so the demo keeps working.
 
 ## Local Setup
 
@@ -101,7 +103,7 @@ Copy `.env.example` to `.env.local` when connecting real AWS services.
 - [x] Add AWS Translate-backed `/api/translate` with mock fallback.
 - [x] Add AWS Transcribe-backed `/api/transcribe` for S3 audio files with mock fallback.
 - [x] Add browser recording/upload UI for voice notes and forwarded phone-call audio.
-- [ ] Replace mock AI with Bedrock.
+- [x] Add Bedrock Claude-backed memory generation with mock fallback.
 - [ ] Add profile-first data model and profile pages.
 - [ ] Add real media tabs for photos, audio, and video.
 - [ ] Add Cognito authentication.
@@ -129,6 +131,7 @@ AWS_SECRET_ACCESS_KEY=
 S3_BUCKET_NAME=before-i-forget-uploads
 DYNAMODB_TABLE_NAME=BeforeIForgetMemories
 STEP_FUNCTION_ARN=
+BEDROCK_MODEL_ID=anthropic.claude-3-haiku-20240307-v1:0
 NEXT_PUBLIC_API_BASE_URL=
 ```
 
@@ -158,7 +161,7 @@ arn:aws:states:us-west-2:085193942503:execution:before-i-forget-memory-workflow:
 - Add Cognito authentication and per-family archives.
 - Expand uploaded media flows beyond presigned URL generation.
 - Add profile-first archives where memories are grouped under loved ones.
-- Replace mock AI with Bedrock prompts and guardrails.
+- Add richer Bedrock prompt evaluation, guardrails, and model-selection controls.
 - Add transcript correction and richer async status UI for longer Transcribe jobs.
 - Add photo and video thumbnail generation Lambdas.
 - Generate shareable PDF/audio keepsake bundles.

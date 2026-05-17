@@ -1,16 +1,18 @@
 import { NextResponse } from "next/server";
-import { generateMemoryCard } from "@/lib/mockAI";
+import { generateMemoryCardWithBedrock } from "@/lib/aws/bedrock";
 import type { GenerateMemoryCardInput } from "@/lib/types";
 
 export async function POST(request: Request) {
   const input = (await request.json()) as GenerateMemoryCardInput;
-  const generated = generateMemoryCard(input);
+  const generated = await generateMemoryCardWithBedrock(input);
   const memoryId = crypto.randomUUID();
   return NextResponse.json({
     id: memoryId,
     memoryId,
-    ...generated,
+    ...generated.data,
     createdAt: new Date().toISOString(),
-    status: "MOCK",
+    status: generated.provider === "bedrock-claude" ? "SUCCEEDED" : "MOCK",
+    provider: generated.provider,
+    warning: generated.warning,
   });
 }

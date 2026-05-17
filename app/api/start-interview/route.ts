@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { generateInterviewQuestions } from "@/lib/mockAI";
+import { generateInterviewQuestionsWithBedrock } from "@/lib/aws/bedrock";
 import type { StartInterviewInput } from "@/lib/types";
 
 export async function POST(request: Request) {
@@ -12,8 +12,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: `Missing required fields: ${missing.join(", ")}` }, { status: 400 });
   }
 
+  const result = await generateInterviewQuestionsWithBedrock(input);
+
   return NextResponse.json({
-    questions: generateInterviewQuestions(input),
-    provider: "mock-ai-bedrock-ready",
+    questions: result.data,
+    provider: result.provider,
+    warning: result.warning,
   });
 }

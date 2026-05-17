@@ -1,6 +1,6 @@
 import { DescribeExecutionCommand, StartExecutionCommand } from "@aws-sdk/client-sfn";
 import { env, hasStepFunctionConfig } from "@/lib/env";
-import { generateMockMemoryCard } from "@/lib/mockMemory";
+import { generateMemoryFromStoryWithBedrock } from "@/lib/aws/bedrock";
 import type { MemoryCard, MemoryInput } from "@/lib/types";
 import { getSFNClient } from "./clients";
 
@@ -11,13 +11,15 @@ type StartMemoryWorkflowResult = {
   memoryCard: MemoryCard;
   mock: boolean;
   warning?: string;
+  aiProvider?: "bedrock-claude" | "mock-ai";
 };
 
 export async function startMemoryWorkflow(
   input: MemoryInput,
 ): Promise<StartMemoryWorkflowResult> {
   const sfnClient = getSFNClient();
-  const memoryCard = generateMockMemoryCard(input);
+  const generated = await generateMemoryFromStoryWithBedrock(input);
+  const memoryCard = generated.data;
 
   if (hasStepFunctionConfig && sfnClient) {
     const controller = new AbortController();
@@ -36,11 +38,14 @@ export async function startMemoryWorkflow(
         executionArn: result.executionArn,
         memoryCard: { ...memoryCard, status: "RUNNING" },
         mock: false,
+        aiProvider: generated.provider,
+        warning: generated.warning,
       };
     } catch (error) {
       return {
         memoryCard,
         mock: true,
+        aiProvider: generated.provider,
         warning: error instanceof Error ? error.message : "Step Functions did not start; using mock memory.",
       };
     } finally {
@@ -51,6 +56,8 @@ export async function startMemoryWorkflow(
   return {
     memoryCard,
     mock: true,
+    aiProvider: generated.provider,
+    warning: generated.warning,
   };
 }
 
