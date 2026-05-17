@@ -13,6 +13,7 @@ export function generateMockMemoryCard(input: MemoryInput): MemoryCard {
   if (hasChai) {
     return {
       memoryId,
+      personId: input.personId,
       personName: input.personName,
       relationship: input.relationship,
       country: input.country,
@@ -35,6 +36,7 @@ export function generateMockMemoryCard(input: MemoryInput): MemoryCard {
 
   return {
     memoryId,
+    personId: input.personId,
     personName: input.personName,
     relationship: input.relationship,
     country: input.country,

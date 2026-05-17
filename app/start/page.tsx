@@ -1,12 +1,12 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, CheckCircle2, Database, GitBranch, Globe2, Mic, PlayCircle } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { UploadBox } from "@/components/UploadBox";
-import { getWorkflowStatus, startMemory } from "@/lib/api";
-import type { Goal, Language, MemoryCard, MemoryType, Relationship } from "@/lib/types";
+import { getWorkflowStatus, listProfiles, startMemory } from "@/lib/api";
+import type { Goal, Language, MemoryCard, MemoryType, PersonProfile, Relationship } from "@/lib/types";
 import type { LucideIcon } from "lucide-react";
 
 const relationships: Relationship[] = ["parent", "grandparent", "friend", "sibling", "teacher", "other"];
@@ -22,6 +22,7 @@ const demoSteps: Array<[LucideIcon, string]> = [
 export default function StartPage() {
   const router = useRouter();
   const [form, setForm] = useState({
+    personId: "",
     personName: "Nani",
     relationship: "grandparent" as Relationship,
     country: "India",
@@ -38,6 +39,28 @@ export default function StartPage() {
   const [audioStatus, setAudioStatus] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
   const [error, setError] = useState("");
+  const [linkedProfile, setLinkedProfile] = useState<PersonProfile | null>(null);
+
+  useEffect(() => {
+    const personId = new URLSearchParams(window.location.search).get("personId");
+    if (!personId) return;
+
+    listProfiles()
+      .then((profiles) => {
+        const profile = profiles.find((item) => item.profileId === personId);
+        if (!profile) return;
+        setLinkedProfile(profile);
+        setForm((current) => ({
+          ...current,
+          personId: profile.profileId,
+          personName: profile.personName,
+          relationship: profile.relationship,
+          country: profile.country,
+          language: profile.language,
+        }));
+      })
+      .catch(() => undefined);
+  }, []);
 
   async function transcribeAudio() {
     if (!fileKey) {
@@ -176,6 +199,13 @@ export default function StartPage() {
                   If AWS takes longer than expected, the same button keeps the memory flow moving with a backup card.
                 </p>
               </div>
+              {linkedProfile ? (
+                <div className="mt-4 rounded-2xl bg-white p-4 text-stone-950 ring-1 ring-rose-900/10">
+                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-rose-900">Linked profile</p>
+                  <p className="mt-2 font-semibold">{linkedProfile.personName}</p>
+                  <p className="mt-1 text-sm text-stone-600">This memory will be saved under their profile.</p>
+                </div>
+              ) : null}
             </div>
           </aside>
 

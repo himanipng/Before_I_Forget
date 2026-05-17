@@ -35,6 +35,7 @@ export type Language =
 export type MemoryStatus = "PENDING" | "RUNNING" | "SUCCEEDED" | "FAILED" | "MOCK" | "DELETED";
 
 export type MemoryInput = {
+  personId?: string;
   personName: string;
   relationship: Relationship;
   country: string;
@@ -46,6 +47,7 @@ export type MemoryInput = {
 
 export type MemoryCard = {
   memoryId: string;
+  personId?: string;
   personName: string;
   relationship: Relationship;
   country: string;
@@ -64,6 +66,29 @@ export type MemoryCard = {
   deletedAt?: string;
   translatedText?: string;
   audioUrl?: string;
+};
+
+export type PersonPhoto = {
+  id: string;
+  fileName: string;
+  fileKey: string;
+  contentType: string;
+  uploadedAt: string;
+  caption?: string;
+};
+
+export type PersonProfile = {
+  profileId: string;
+  entityType: "person";
+  personName: string;
+  relationship: Relationship;
+  country: string;
+  language: Language;
+  birthday?: string;
+  notes?: string;
+  photos: PersonPhoto[];
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type ApiResponse<T> = {

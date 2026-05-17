@@ -1,4 +1,4 @@
-import type { ApiResponse, MemoryCard, MemoryInput } from "./types";
+import type { ApiResponse, MemoryCard, MemoryInput, PersonPhoto, PersonProfile } from "./types";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
@@ -50,6 +50,35 @@ export function getUploadUrl(fileName: string, contentType: string) {
   return request<{ uploadUrl: string; fileKey: string }>("/api/upload-url", {
     method: "POST",
     body: JSON.stringify({ fileName, contentType }),
+  });
+}
+
+export function getPhotoUrl(fileKey: string) {
+  return request<{ url: string; fileKey: string }>(`/api/photo-url?fileKey=${encodeURIComponent(fileKey)}`);
+}
+
+export function listProfiles() {
+  return request<PersonProfile[]>("/api/profiles");
+}
+
+export function createProfile(profile: Partial<PersonProfile>) {
+  return request<PersonProfile>("/api/profiles", {
+    method: "POST",
+    body: JSON.stringify(profile),
+  });
+}
+
+export function updateProfile(profileId: string, profile: Partial<PersonProfile>) {
+  return request<PersonProfile>(`/api/profiles/${encodeURIComponent(profileId)}`, {
+    method: "PATCH",
+    body: JSON.stringify(profile),
+  });
+}
+
+export function addProfilePhoto(profileId: string, photo: PersonPhoto) {
+  return request<PersonProfile>(`/api/profiles/${encodeURIComponent(profileId)}/photos`, {
+    method: "POST",
+    body: JSON.stringify(photo),
   });
 }
 

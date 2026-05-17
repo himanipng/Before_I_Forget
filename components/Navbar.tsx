@@ -11,6 +11,12 @@ export function Navbar() {
 
         <div className="flex items-center gap-2">
           <Link
+            href="/people"
+            className="rounded-full border border-[#D4C4B4] bg-white/60 px-4 py-1.5 text-sm font-medium text-stone-700 transition hover:bg-white"
+          >
+            People
+          </Link>
+          <Link
             href="/archive"
             className="rounded-full border border-[#D4C4B4] bg-white/60 px-4 py-1.5 text-sm font-medium text-stone-700 transition hover:bg-white"
           >

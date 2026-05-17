@@ -49,7 +49,9 @@ function normalizeMemory(raw: MemoryCard & { id?: string }): MemoryCard {
 async function readMockMemories() {
   await ensureStore();
   const raw = await fs.readFile(dataFile, "utf8");
-  const fileMemories = (JSON.parse(raw) as Array<MemoryCard & { id?: string }>).map(normalizeMemory);
+  const fileMemories = (JSON.parse(raw) as Array<MemoryCard & { id?: string; entityType?: string }>)
+    .filter((item) => item.entityType !== "person")
+    .map(normalizeMemory);
   const merged = [...mockMemories, ...fileMemories];
   const byId = new Map(merged.map((memory) => [memory.memoryId, memory]));
   return Array.from(byId.values());
@@ -126,7 +128,8 @@ export async function listMemories(): Promise<MemoryCard[]> {
         ),
         "DynamoDB list",
       );
-      return ((result.Items || []) as MemoryCard[])
+      return ((result.Items || []) as Array<MemoryCard & { entityType?: string }>)
+        .filter((item) => item.entityType !== "person")
         .filter(isVisibleMemory)
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     } catch (error) {
