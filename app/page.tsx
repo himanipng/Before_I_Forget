@@ -1,106 +1,159 @@
 import Link from "next/link";
-import { ArrowRight, Archive, Cloud, Languages, Mic, NotebookPen, PlayCircle } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import { Hero } from "@/components/Hero";
-import { MemoryCard } from "@/components/MemoryCard";
 import { Navbar } from "@/components/Navbar";
-import type { MemoryCardData } from "@/lib/types";
+import { BirthdayBanner } from "@/components/BirthdayBanner";
+import { ArchiveCard } from "@/components/ArchiveCard";
+import type { ArchiveCardData } from "@/components/ArchiveCard";
 
-const previewMemory: MemoryCardData = {
-  id: "preview",
-  memoryId: "preview",
-  personName: "Nani",
-  relationship: "grandparent",
-  country: "India",
-  language: "Hindi",
-  memoryType: "recipe",
-  title: "The Mornings She Made Warm",
-  summary:
-    "Every morning, she made chai before school, not just as a drink, but as a quiet way of saying you were cared for.",
-  quote: "She made chai every morning before school.",
-  lesson: "Care is often shown through small routines.",
-  culturalContext:
-    "In many Indian families, chai is a morning rhythm, a welcome, and a way of carrying tenderness across generations.",
-  followUpQuestion: "What spice made her chai taste like hers?",
-  gratitudeLetter:
-    "I do not think I realized back then how much those mornings meant. Thank you for every cup and every quiet way you loved us.",
-  createdAt: new Date().toISOString(),
-  status: "MOCK",
-};
-
-const judgePath: Array<[LucideIcon, string, string]> = [
-  [PlayCircle, "Start Memory", "Use the prefilled Nani story and run the workflow without setup."],
-  [Archive, "Open Archive", "Confirm the saved card appears from the backend storage path."],
-  [Cloud, "Show AWS", "Point to the serverless workflow and Lambda responsibilities."],
+const demoCards: ArchiveCardData[] = [
+  {
+    id: "1",
+    gradient: "linear-gradient(160deg, #C8A882 0%, #7A5030 45%, #3E2010 100%)",
+    category: "Recipe",
+    occasionDate: "June 6",
+    name: "Nani",
+    relationship: "Grandmother",
+    country: "India",
+    title: "The Cardamom Chai That Cured Everything",
+    themes: ["Her mornings", "The ritual she kept"],
+    createdAt: "March 2024",
+    photos: 3,
+    audios: 1,
+    href: "/start",
+  },
+  {
+    id: "2",
+    gradient: "linear-gradient(160deg, #B8C4BC 0%, #6A7E72 45%, #2E3E38 100%)",
+    category: "Advice",
+    occasionDate: "August 14",
+    name: "Thatha",
+    relationship: "Grandfather",
+    country: "India",
+    title: "He Never Learned English but Always Knew What to Say",
+    themes: ["Roots I carry everywhere", "A roadmap I didn't know I needed"],
+    createdAt: "November 2024",
+    photos: 3,
+    audios: 1,
+    href: "/start",
+  },
+  {
+    id: "3",
+    gradient: "linear-gradient(160deg, #C4B090 0%, #7B5C38 45%, #3D2818 100%)",
+    category: "Life Story",
+    occasionDate: "Dec 15",
+    name: "Amma",
+    relationship: "Mother",
+    country: "Sri Lanka",
+    title: "The Village She Left Behind but Never Forgot",
+    themes: ["What home means", "The price of leaving"],
+    createdAt: "January 2025",
+    photos: 2,
+    audios: 1,
+    href: "/start",
+  },
+  {
+    id: "4",
+    gradient: "linear-gradient(160deg, #D4C4A0 0%, #8B7248 45%, #453820 100%)",
+    category: "Childhood Memory",
+    occasionDate: "Oct 3",
+    name: "Ajji",
+    relationship: "Grandmother",
+    country: "Karnataka",
+    title: "The Mango Tree Was Her First Classroom",
+    themes: ["Rooted in memory", "Joy found in simplicity"],
+    createdAt: "February 2025",
+    photos: 4,
+    audios: 0,
+    href: "/start",
+  },
 ];
 
 export default function Home() {
   return (
     <>
       <Navbar />
-      <main>
-        <Hero />
-        <Section eyebrow="Judge path" title="Three clicks show the whole project.">
-          <div className="grid gap-4 md:grid-cols-3">
-            {judgePath.map(([Icon, title, body]) => (
-              <div key={title} className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-stone-900/5">
-                <Icon className="mb-5 text-rose-900" />
-                <h3 className="text-xl font-semibold text-stone-950">{title}</h3>
-                <p className="mt-3 leading-7 text-stone-600">{body}</p>
-              </div>
+      <main className="pb-20">
+        <BirthdayBanner />
+
+        <section className="mx-auto mt-10 max-w-7xl px-4 sm:px-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose-900">Archive</p>
+          <h1
+            className="mt-2 text-5xl leading-tight text-stone-900 sm:text-6xl"
+            style={{ fontFamily: "var(--font-lora), Georgia, serif", fontStyle: "italic" }}
+          >
+            Gratitude, Preserved
+          </h1>
+          <p
+            className="mt-2 text-[1.05rem] text-stone-500"
+            style={{ fontFamily: "var(--font-lora), Georgia, serif", fontStyle: "italic" }}
+          >
+            Tap any memory to open it.
+          </p>
+
+          <div className="mt-8 grid gap-5 sm:grid-cols-2">
+            {demoCards.map((card) => (
+              <ArchiveCard key={card.id} card={card} />
             ))}
           </div>
-        </Section>
-        <Section eyebrow="What the demo proves" title="One story moves through the full keepsake pipeline.">
-          <div className="grid gap-4 md:grid-cols-4">
-            {([
-              [NotebookPen, "Prefilled story input", "A realistic family memory is ready so the judge can run it immediately."],
-              [Mic, "Audio-ready branch", "Upload and Transcribe controls are visible without blocking the core demo."],
-              [Languages, "Translation path", "AWS Translate is connected with a mock fallback for reliability."],
-              [Cloud, "Saved result", "The generated card is written through the storage abstraction and opened instantly."],
-            ] as [LucideIcon, string, string][]).map(([Icon, title, body]) => (
-              <div key={title} className="rounded-3xl border border-rose-900/10 bg-[#fff8f1] p-6">
-                <Icon className="mb-5 text-rose-900" />
-                <h3 className="font-semibold text-stone-950">{title}</h3>
-                <p className="mt-3 text-sm leading-6 text-stone-600">{body}</p>
-              </div>
-            ))}
-          </div>
-        </Section>
-        <Section eyebrow="AWS proof points" title="The frontend stays simple because the workflow is serverless.">
-          <div className="rounded-[2rem] border border-rose-900/10 bg-white p-6 text-stone-950 shadow-xl shadow-rose-950/8 sm:p-8">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-              {["S3 uploads", "Transcribe", "Translate", "Step Functions", "DynamoDB"].map((service) => (
-                <div key={service} className="rounded-2xl bg-[#fff8f1] p-4 ring-1 ring-rose-900/10">
-                  <p className="font-semibold">{service}</p>
-                  <p className="mt-2 text-sm leading-6 text-stone-600">SDK v3-ready integration point.</p>
-                </div>
-              ))}
+
+          <div className="mt-10 flex items-center justify-between rounded-2xl border border-[#DFD0C0] bg-white/60 px-6 py-5">
+            <div>
+              <p className="font-semibold text-stone-900">Ready to preserve a voice?</p>
+              <p className="mt-1 text-sm text-stone-500">A guided interview takes about 10 minutes.</p>
             </div>
-          </div>
-        </Section>
-        <Section eyebrow="Demo memory card preview" title="The output feels personal, not generated.">
-          <MemoryCard memory={previewMemory} />
-          <div className="mt-8 text-center">
             <Link
               href="/start"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-rose-900 px-6 py-3 font-semibold text-white shadow-lg shadow-rose-950/15 hover:bg-rose-950"
+              className="rounded-full bg-[#881337] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#4c0519]"
             >
-              Start a Memory <ArrowRight size={18} />
+              Start a Memory
             </Link>
           </div>
-        </Section>
+        </section>
+
+        <TechSection />
       </main>
     </>
   );
 }
 
-function Section({ eyebrow, title, children }: { eyebrow: string; title: string; children: React.ReactNode }) {
+function TechSection() {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-rose-900">{eyebrow}</p>
-      <h2 className="mt-3 max-w-3xl text-3xl font-semibold leading-tight text-stone-950 sm:text-5xl">{title}</h2>
-      <div className="mt-8">{children}</div>
+    <section className="mx-auto mt-16 max-w-7xl px-4 sm:px-6">
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose-900">How It Works</p>
+      <h2
+        className="mt-2 max-w-2xl text-3xl leading-snug text-stone-900 sm:text-4xl"
+        style={{ fontFamily: "var(--font-lora), Georgia, serif" }}
+      >
+        A small ritual — from question to keepsake.
+      </h2>
+
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          { step: "01", label: "Choose a person", body: "Start with Nani, a friend, a teacher — anyone whose voice matters." },
+          { step: "02", label: "Interview gently", body: "AI generates questions shaped by relationship, culture, and goal." },
+          { step: "03", label: "Preserve across language", body: "AWS Translate carries the story across any language barrier." },
+          { step: "04", label: "Save the memory", body: "Audio via Polly, text via DynamoDB, files via S3 — all serverless." },
+        ].map(({ step, label, body }) => (
+          <div key={step} className="rounded-2xl border border-[#DFD0C0] bg-white/70 p-5">
+            <p className="text-xs font-bold tracking-widest text-rose-900">{step}</p>
+            <p className="mt-2 font-semibold text-stone-900">{label}</p>
+            <p className="mt-2 text-sm leading-6 text-stone-500">{body}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-6 rounded-2xl bg-stone-950 px-6 py-5 text-white">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-400">AWS Services</p>
+        <div className="mt-4 flex flex-wrap gap-3">
+          {["S3", "Step Functions", "Transcribe", "Translate", "Polly", "DynamoDB", "Lambda", "Bedrock"].map((s) => (
+            <span key={s} className="rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-white ring-1 ring-white/10">
+              {s}
+            </span>
+          ))}
+        </div>
+        <Link href="/architecture" className="mt-4 inline-block text-sm font-medium text-stone-400 underline underline-offset-4 transition hover:text-white">
+          See full architecture diagram →
+        </Link>
+      </div>
     </section>
   );
 }
