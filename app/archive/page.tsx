@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Archive, Search } from "lucide-react";
+import { Archive, Database, Search } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { listMemories } from "@/lib/api";
 import type { MemoryCard } from "@/lib/types";
@@ -28,17 +28,52 @@ export default function ArchivePage() {
   }, [filters, memories]);
 
   const unique = (key: keyof MemoryCard) => Array.from(new Set(memories.map((memory) => String(memory[key] || "")).filter(Boolean)));
+  const newest = filtered[0];
 
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-[#fffaf5] px-4 py-10 sm:px-6">
+      <main className="min-h-screen bg-[linear-gradient(180deg,#fff8f1,#fffaf5)] px-4 py-8 sm:px-6">
         <div className="mx-auto max-w-7xl">
-          <p className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-rose-900 shadow-sm">
-            <Archive size={16} /> Archive
-          </p>
-          <h1 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight text-stone-950 sm:text-6xl">Saved memories, ready to return to.</h1>
-          <div className="mt-8 grid gap-3 rounded-[2rem] bg-white p-4 shadow-sm ring-1 ring-stone-900/5 md:grid-cols-4">
+          <section className="grid gap-5 rounded-[2rem] bg-stone-950 p-6 text-white shadow-xl shadow-rose-950/12 lg:grid-cols-[1fr_0.9fr]">
+            <div>
+              <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-rose-100">
+                <Archive size={16} /> Archive
+              </p>
+              <h1 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight sm:text-6xl">Saved memories from the workflow.</h1>
+              <p className="mt-4 max-w-2xl leading-7 text-rose-50/75">
+                This is the judging proof screen: after Start Memory runs, the newest DynamoDB-backed keepsake appears here.
+              </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+              {[
+                ["Saved cards", memories.length],
+                ["Showing", filtered.length],
+                ["Countries", unique("country").length],
+              ].map(([label, value]) => (
+                <div key={label} className="rounded-2xl bg-white/8 p-4 ring-1 ring-white/10">
+                  <p className="text-sm text-rose-50/65">{label}</p>
+                  <p className="mt-1 text-3xl font-semibold">{value}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+          {newest ? (
+            <Link
+              href={`/memory/${newest.memoryId}`}
+              className="mt-6 grid gap-4 rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-stone-900/5 transition hover:-translate-y-0.5 hover:shadow-lg md:grid-cols-[1fr_auto]"
+            >
+              <div>
+                <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-rose-900">
+                  <Database size={16} /> Newest saved result
+                </p>
+                <h2 className="mt-3 text-2xl font-semibold text-stone-950">{newest.title}</h2>
+                <p className="mt-2 max-w-3xl leading-7 text-stone-600">{newest.summary}</p>
+              </div>
+              <span className="self-center rounded-full bg-rose-900 px-5 py-3 text-sm font-semibold text-white">Open card</span>
+            </Link>
+          ) : null}
+          <div className="mt-6 grid gap-3 rounded-[2rem] bg-white p-4 shadow-sm ring-1 ring-stone-900/5 md:grid-cols-4">
             {(["relationship", "country", "memoryType", "language"] as const).map((key) => (
               <select key={key} value={filters[key]} onChange={(e) => setFilters({ ...filters, [key]: e.target.value })} className="field">
                 <option value="">{key === "memoryType" ? "memory type" : key}</option>

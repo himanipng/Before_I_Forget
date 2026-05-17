@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { HeartHandshake } from "lucide-react";
+import { ArrowRight, HeartHandshake } from "lucide-react";
 
 const links = [
   { href: "/start", label: "Start" },
@@ -27,6 +27,12 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
+          <Link
+            href="/start"
+            className="hidden items-center gap-1 rounded-full bg-rose-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-950 sm:inline-flex"
+          >
+            Run demo <ArrowRight size={15} />
+          </Link>
         </div>
       </nav>
     </header>

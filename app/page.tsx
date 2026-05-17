@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Cloud, Heart, Languages, Mic, NotebookPen } from "lucide-react";
+import { ArrowRight, Archive, Cloud, Languages, Mic, NotebookPen, PlayCircle } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Hero } from "@/components/Hero";
 import { MemoryCard } from "@/components/MemoryCard";
@@ -28,34 +28,36 @@ const previewMemory: MemoryCardData = {
   status: "MOCK",
 };
 
+const judgePath: Array<[LucideIcon, string, string]> = [
+  [PlayCircle, "Start Memory", "Use the prefilled Nani story and run the workflow without setup."],
+  [Archive, "Open Archive", "Confirm the saved card appears from the backend storage path."],
+  [Cloud, "Show AWS", "Point to the serverless workflow and Lambda responsibilities."],
+];
+
 export default function Home() {
   return (
     <>
       <Navbar />
       <main>
         <Hero />
-        <Section eyebrow="Why it matters" title="Distance should not be the reason a voice disappears.">
+        <Section eyebrow="Judge path" title="Three clicks show the whole project.">
           <div className="grid gap-4 md:grid-cols-3">
-            {[
-              ["For immigrant families", "Capture recipes, sacrifice stories, sayings, and hometown details before they become fragments."],
-              ["For overseas friends", "Turn long-distance love into preserved voice notes, letters, and translated keepsakes."],
-              ["For loved ones aging", "Ask gently now, while stories can still be told in their own words."],
-            ].map(([title, body]) => (
+            {judgePath.map(([Icon, title, body]) => (
               <div key={title} className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-stone-900/5">
-                <Heart className="mb-5 text-rose-900" />
+                <Icon className="mb-5 text-rose-900" />
                 <h3 className="text-xl font-semibold text-stone-950">{title}</h3>
                 <p className="mt-3 leading-7 text-stone-600">{body}</p>
               </div>
             ))}
           </div>
         </Section>
-        <Section eyebrow="How it works" title="A small guided ritual, from question to keepsake.">
+        <Section eyebrow="What the demo proves" title="One story moves through the full keepsake pipeline.">
           <div className="grid gap-4 md:grid-cols-4">
             {([
-              [NotebookPen, "Start with a person", "Choose Nani, a friend, a teacher, a sibling, or someone far away."],
-              [Mic, "Ask gently", "Generate interview questions shaped by relationship, place, language, and goal."],
-              [Languages, "Preserve across language", "Mock Translate keeps the demo moving while AWS integration is ready."],
-              [Cloud, "Save the memory", "Store cards through a DynamoDB-style abstraction and S3-ready media layer."],
+              [NotebookPen, "Prefilled story input", "A realistic family memory is ready so the judge can run it immediately."],
+              [Mic, "Audio-ready branch", "Upload and Transcribe controls are visible without blocking the core demo."],
+              [Languages, "Translation path", "AWS Translate is connected with a mock fallback for reliability."],
+              [Cloud, "Saved result", "The generated card is written through the storage abstraction and opened instantly."],
             ] as [LucideIcon, string, string][]).map(([Icon, title, body]) => (
               <div key={title} className="rounded-3xl border border-rose-900/10 bg-[#fff8f1] p-6">
                 <Icon className="mb-5 text-rose-900" />
@@ -65,10 +67,10 @@ export default function Home() {
             ))}
           </div>
         </Section>
-        <Section eyebrow="Built with AWS" title="Serverless shape now, Bedrock-ready later.">
+        <Section eyebrow="AWS proof points" title="The frontend stays simple because the workflow is serverless.">
           <div className="rounded-[2rem] bg-stone-950 p-6 text-white shadow-xl shadow-stone-950/10 sm:p-8">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-              {["S3 uploads", "Transcribe", "Translate", "Polly", "DynamoDB-style storage"].map((service) => (
+              {["S3 uploads", "Transcribe", "Translate", "Step Functions", "DynamoDB"].map((service) => (
                 <div key={service} className="rounded-2xl bg-white/8 p-4 ring-1 ring-white/10">
                   <p className="font-semibold">{service}</p>
                   <p className="mt-2 text-sm leading-6 text-stone-300">SDK v3-ready integration point.</p>

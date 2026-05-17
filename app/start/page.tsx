@@ -2,16 +2,22 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Globe2, Mic } from "lucide-react";
+import { ArrowRight, CheckCircle2, Database, GitBranch, Globe2, Mic, PlayCircle } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { UploadBox } from "@/components/UploadBox";
 import { getWorkflowStatus, startMemory } from "@/lib/api";
 import type { Goal, Language, MemoryCard, MemoryType, Relationship } from "@/lib/types";
+import type { LucideIcon } from "lucide-react";
 
 const relationships: Relationship[] = ["parent", "grandparent", "friend", "sibling", "teacher", "other"];
 const languages: Language[] = ["English", "Hindi", "Spanish", "Mandarin", "Arabic", "Tagalog", "Vietnamese", "French", "other"];
 const memoryTypes: MemoryType[] = ["life story", "recipe", "advice", "hardship", "childhood memory", "gratitude", "reconnecting"];
 const goals: Goal[] = ["preserve story", "write thank-you letter", "translate memory", "create audio keepsake"];
+const demoSteps: Array<[LucideIcon, string]> = [
+  [PlayCircle, "Click Start memory workflow"],
+  [GitBranch, "Step Functions starts in the background"],
+  [Database, "Memory opens and appears in Archive"],
+];
 
 export default function StartPage() {
   const router = useRouter();
@@ -131,17 +137,48 @@ export default function StartPage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-[linear-gradient(180deg,#fff8f1,#f5e5d8)] px-4 py-10 sm:px-6">
-        <div className="mx-auto max-w-5xl">
-          <div className="mb-8 max-w-3xl">
-            <p className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-rose-900 shadow-sm">
-              <Globe2 size={16} /> Start Memory
-            </p>
-            <h1 className="mt-5 text-4xl font-semibold leading-tight text-stone-950 sm:text-6xl">
-              Begin with someone you wish you could ask forever.
-            </h1>
-          </div>
-          <form onSubmit={submit} className="rounded-[2rem] bg-white/85 p-5 shadow-xl shadow-rose-950/8 ring-1 ring-stone-900/5 sm:p-8">
+      <main className="min-h-screen bg-[linear-gradient(180deg,#fff8f1,#f5e5d8)] px-4 py-8 sm:px-6">
+        <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[0.82fr_1.18fr]">
+          <aside className="lg:sticky lg:top-24 lg:self-start">
+            <div className="rounded-[2rem] bg-stone-950 p-6 text-white shadow-xl shadow-rose-950/15 sm:p-8">
+              <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm font-semibold text-rose-100">
+                <Globe2 size={15} /> Judge demo
+              </p>
+              <h1 className="mt-5 text-4xl font-semibold leading-tight sm:text-5xl">Run one memory from input to archive.</h1>
+              <p className="mt-4 leading-7 text-rose-50/75">
+                The form is prefilled so the demo can start immediately. The workflow saves a card first, then the archive proves it persisted.
+              </p>
+              <div className="mt-6 grid gap-3">
+                {demoSteps.map(([Icon, label]) => (
+                  <div key={label} className="flex items-center gap-3 rounded-2xl bg-white/8 p-4 ring-1 ring-white/10">
+                    <span className="grid size-9 place-items-center rounded-full bg-rose-100 text-rose-950">
+                      <Icon size={17} />
+                    </span>
+                    <span className="font-medium">{label}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-6 rounded-2xl bg-[#fff8f1] p-4 text-stone-950">
+                <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-rose-900">
+                  <CheckCircle2 size={16} /> Fallback safe
+                </p>
+                <p className="mt-2 text-sm leading-6 text-stone-700">
+                  If AWS or Vercel slows down, the same button falls back to a mock card so the presentation keeps moving.
+                </p>
+              </div>
+            </div>
+          </aside>
+
+          <form onSubmit={submit} className="rounded-[2rem] bg-white/88 p-5 shadow-xl shadow-rose-950/8 ring-1 ring-stone-900/5 sm:p-8">
+            <div className="mb-6 flex flex-col gap-3 border-b border-stone-900/10 pb-6 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-rose-900">Memory setup</p>
+                <h2 className="mt-2 text-3xl font-semibold text-stone-950">Nani&apos;s chai story</h2>
+              </div>
+              <button disabled={loading} className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-rose-900 px-6 py-4 font-semibold text-white shadow-lg shadow-rose-950/15 transition hover:bg-rose-950 disabled:opacity-60 sm:w-auto">
+                {loading ? "Starting memory..." : "Start workflow"} <ArrowRight size={18} />
+              </button>
+            </div>
             <div className="grid gap-5 md:grid-cols-2">
               <Field label="Person's name">
                 <input value={form.personName} onChange={(e) => setForm({ ...form, personName: e.target.value })} className="field" />
@@ -194,17 +231,17 @@ export default function StartPage() {
             {error ? (
               <p className="mt-5 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">{error}</p>
             ) : null}
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <button disabled={loading} className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-rose-900 px-6 py-4 font-semibold text-white shadow-lg shadow-rose-950/15 transition hover:bg-rose-950 disabled:opacity-60 sm:w-auto">
-                {loading ? "Starting memory..." : "Start memory workflow"} <ArrowRight size={18} />
-              </button>
+            <div className="mt-7 flex flex-col gap-3 border-t border-stone-900/10 pt-6 sm:flex-row sm:items-center">
               <button
                 type="button"
                 onClick={startInterview}
                 disabled={loading}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-4 font-semibold text-rose-950 shadow-sm ring-1 ring-rose-900/15 transition hover:bg-rose-50 disabled:opacity-60 sm:w-auto"
               >
-                Record or transcribe audio <Mic size={18} />
+                Generate interview questions <Mic size={18} />
+              </button>
+              <button disabled={loading} className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-rose-900 px-6 py-4 font-semibold text-white shadow-lg shadow-rose-950/15 transition hover:bg-rose-950 disabled:opacity-60 sm:w-auto">
+                {loading ? "Starting memory..." : "Start memory workflow"} <ArrowRight size={18} />
               </button>
               {loading && statusMessage ? <p className="text-sm font-medium text-stone-600">{statusMessage}</p> : null}
             </div>
