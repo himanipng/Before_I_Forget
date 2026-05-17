@@ -156,7 +156,7 @@ AWS_SECRET_ACCESS_KEY=${ACCESS_KEY_SECRET}
 S3_BUCKET_NAME=${BUCKET_NAME}
 DYNAMODB_TABLE_NAME=${TABLE_NAME}
 STEP_FUNCTION_ARN=<paste Person 1 Step Functions state machine ARN>
-BEDROCK_MODEL_ID=anthropic.claude-3-haiku-20240307-v1:0
+BEDROCK_MODEL_ID=us.anthropic.claude-haiku-4-5-20251001-v1:0
 
 Optional public variable:
 NEXT_PUBLIC_API_BASE_URL=
