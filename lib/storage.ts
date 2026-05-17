@@ -10,6 +10,10 @@ const dataFile = path.join(dataDir, "memories.json");
 const mockMemories: MemoryCard[] = [];
 const AWS_STORAGE_TIMEOUT_MS = 5000;
 
+function isVisibleMemory(memory: MemoryCard) {
+  return memory.status !== "DELETED" && !memory.deletedAt;
+}
+
 function withStorageTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
   let timeout: ReturnType<typeof setTimeout>;
 
@@ -98,14 +102,15 @@ export async function getMemory(memoryId: string): Promise<MemoryCard | null> {
         ),
         "DynamoDB read",
       );
-      return result.Item ? (result.Item as MemoryCard) : null;
+      const memory = result.Item ? (result.Item as MemoryCard) : null;
+      return memory && isVisibleMemory(memory) ? memory : null;
     } catch (error) {
       console.warn(error instanceof Error ? error.message : "DynamoDB read failed; using local fallback.");
     }
   }
 
   const memories = await readMockMemories();
-  return memories.find((memory) => memory.memoryId === memoryId) || null;
+  return memories.find((memory) => memory.memoryId === memoryId && isVisibleMemory(memory)) || null;
 }
 
 export async function listMemories(): Promise<MemoryCard[]> {
@@ -121,12 +126,14 @@ export async function listMemories(): Promise<MemoryCard[]> {
         ),
         "DynamoDB list",
       );
-      return ((result.Items || []) as MemoryCard[]).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+      return ((result.Items || []) as MemoryCard[])
+        .filter(isVisibleMemory)
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     } catch (error) {
       console.warn(error instanceof Error ? error.message : "DynamoDB list failed; using local fallback.");
     }
   }
 
   const memories = await readMockMemories();
-  return memories.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return memories.filter(isVisibleMemory).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }

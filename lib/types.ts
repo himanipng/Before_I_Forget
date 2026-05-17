@@ -32,7 +32,7 @@ export type Language =
   | "French"
   | "other";
 
-export type MemoryStatus = "PENDING" | "RUNNING" | "SUCCEEDED" | "FAILED" | "MOCK";
+export type MemoryStatus = "PENDING" | "RUNNING" | "SUCCEEDED" | "FAILED" | "MOCK" | "DELETED";
 
 export type MemoryInput = {
   personName: string;
@@ -61,6 +61,7 @@ export type MemoryCard = {
   createdAt: string;
   status: MemoryStatus;
   provider?: "bedrock-claude" | "mock-ai";
+  deletedAt?: string;
   translatedText?: string;
   audioUrl?: string;
 };
