@@ -1,21 +1,22 @@
 # Before I Forget
 
-Before I Forget is an emotional memory-preservation app for immigrant families, overseas friends, and loved ones separated across countries. It helps people preserve voices, recipes, advice, gratitude letters, and family stories before those memories are lost.
+Before I Forget is an emotional memory-preservation app for immigrant families, overseas friends, elders, and loved ones separated across countries. It helps people preserve voices, photos, recipes, advice, gratitude letters, and family stories before those memories are lost.
 
 Theme connection: **Build with Gratitude**. The product is built around saying thank you while people can still hear it.
 
 ## Why This Matters
 
-Many families carry their most important history in voice notes, recipes, repeated phrases, and small routines. For immigrant and overseas families, distance makes those memories easier to postpone and easier to lose. Before I Forget turns a gentle interview into a keepsake memory card with a story summary, quote, lesson, cultural context, follow-up question, gratitude letter, translation, and mock spoken audio.
+Many families carry their most important history in voice notes, recipes, repeated phrases, photos, and small routines. For immigrant and overseas families, distance makes those memories easier to postpone and easier to lose. Before I Forget turns a gentle interview into a keepsake memory card with a story summary, quote, lesson, cultural context, follow-up question, gratitude letter, translation, and mock spoken audio. The app also groups memories by person so families can visit Nani, Safia, a friend, or an elder as a living profile instead of searching through loose files.
 
 ## AWS Services Prepared
 
 - **Amazon S3**: upload-ready storage layer for audio, photos, and keepsake files.
-- **Amazon Transcribe**: SDK-ready voice-to-text integration, mocked for local demo.
-- **Amazon Translate**: route contract and SDK-ready translation helper, mocked for local demo.
+- **Amazon Transcribe**: AWS-backed voice-to-text for uploaded recordings, with mock fallback for demo safety.
+- **Amazon Translate**: AWS-backed translation helper for multilingual keepsakes and page text experiments, with mock fallback.
 - **Amazon Bedrock Claude**: real Claude invocation path for interview questions and memory-card generation, with mock fallback.
 - **Amazon Polly**: route contract and SDK-ready speech synthesis helper, mocked for local demo.
 - **DynamoDB storage**: clean storage abstraction for memory cards and sessions, backed by DynamoDB when AWS env vars exist and local JSON/mock mode for safe demos.
+- **DynamoDB profile storage**: person profiles, uploaded profile photos, and profile-linked memories for the People page.
 - **API Gateway/Lambda style**: each `app/api/*/route.ts` is structured as a serverless handler boundary.
 - **Cognito-ready auth placeholder**: the demo does not require login, but the data model is ready for user/session ownership.
 
@@ -53,6 +54,14 @@ Bedrock-backed paths:
 
 If Bedrock is not configured, model access is not enabled, or the model call fails, the app falls back to the mock AI response so the demo keeps working.
 
+## Product Flows
+
+- **Start Memory**: a guided family-side workflow with browser recording/upload, Amazon Transcribe, Bedrock-backed memory generation, Step Functions polling, and DynamoDB save.
+- **People**: profile-first archive where each person can have a relationship, country, language, notes, uploaded photos, and attached memories. Memories attach through `personId` when started from a profile and also fall back to matching by person name for older demo cards.
+- **Archive**: cross-person memory view with filters. Cards use each person profile's first uploaded photo as the visual header when available.
+- **Elder Mode**: simplified elder-facing page at `/elder` with large text, recording/upload, one big save action, and page-level UI translation for English, Hindi, Spanish, Mandarin, Arabic, Tagalog, Vietnamese, and French.
+- **Architecture**: Lambda-centered snake-flow diagram showing the secure Next.js bridge, Step Functions, Lambda chain, S3, Transcribe, Translate, Bedrock, Polly, and DynamoDB.
+
 ## Local Setup
 
 ```bash
@@ -64,15 +73,17 @@ Copy `.env.example` to `.env.local` when connecting real AWS services.
 
 ## Judge Demo Script
 
-1. Start a memory for “Nani”
-2. Choose grandmother, India, Hindi, recipe
-3. Generate interview questions
-4. Enter a short story about chai
-5. Generate memory card
-6. Show gratitude letter
-7. Show architecture page
-8. Open `aws-workflow/` and point to the seven Lambda functions
-9. Explain that Bedrock replaces the mock emotional AI layer
+1. Open People and show that memories are organized by person.
+2. Create or open the “Nani” profile and upload a profile photo.
+3. Start a memory from Nani's profile so the memory attaches to her.
+4. Choose grandmother, India, Hindi, recipe.
+5. Record/upload audio or enter a short story about chai.
+6. Generate the memory card and show the gratitude letter.
+7. Open Archive and point out the profile photo on the saved memory card.
+8. Open Elder Mode and switch the page language to Hindi, Spanish, Mandarin, Arabic, Tagalog, Vietnamese, or French.
+9. Show the architecture page and the Lambda-centered snake workflow.
+10. Open `aws-workflow/` and point to the seven Lambda functions.
+11. Explain that Bedrock powers the emotional AI layer with a mock fallback for demo safety.
 
 ## API Routes
 
@@ -85,7 +96,12 @@ Copy `.env.example` to `.env.local` when connecting real AWS services.
 - `POST /api/save-memory`
 - `GET /api/memories`
 - `GET /api/memories/[id]`
+- `GET /api/profiles`
+- `POST /api/profiles`
+- `PATCH /api/profiles/[id]`
+- `POST /api/profiles/[id]/photos`
 - `POST /api/upload-url`
+- `GET /api/photo-url`
 - `GET /api/workflow-status`
 
 ## Integration Status
@@ -104,7 +120,11 @@ Copy `.env.example` to `.env.local` when connecting real AWS services.
 - [x] Add AWS Transcribe-backed `/api/transcribe` for S3 audio files with mock fallback.
 - [x] Add browser recording/upload UI for voice notes and forwarded phone-call audio.
 - [x] Add Bedrock Claude-backed memory generation with mock fallback.
-- [ ] Add profile-first data model and profile pages.
+- [x] Add profile-first People page with person profiles.
+- [x] Attach new memories to person profiles through `personId`.
+- [x] Add profile photo uploads through S3 presigned URLs.
+- [x] Show profile photos on People and Archive cards.
+- [x] Add simplified Elder Mode with page-level language switching.
 - [ ] Add real media tabs for photos, audio, and video.
 - [ ] Add Cognito authentication.
 - [ ] Add production-grade media processing for thumbnails, transcripts, and video.
@@ -117,7 +137,8 @@ This branch adds the secure API/data bridge for the Serverless with Lambda track
 - Next.js API routes in `app/api` act as the secure server-side bridge between the frontend and AWS.
 - AWS credentials are read only from server-side environment variables. They are never placed in client components and are never prefixed with `NEXT_PUBLIC_`.
 - DynamoDB stores generated memory cards with `memoryId` as the primary key.
-- S3 stores uploaded audio, photo, and memory files through server-generated presigned upload URLs.
+- DynamoDB also stores person profile metadata for the People page.
+- S3 stores uploaded audio, profile photos, and memory files through server-generated presigned upload URLs.
 - Step Functions starts Person 1's Lambda workflow through `StartExecutionCommand`.
 - `GET /api/workflow-status` can read workflow state through `DescribeExecutionCommand`.
 - If AWS environment variables are missing, the app automatically runs in mock mode so the hackathon demo remains safe and reliable.
@@ -159,10 +180,9 @@ arn:aws:states:us-west-2:085193942503:execution:before-i-forget-memory-workflow:
 ## Future Improvements
 
 - Add Cognito authentication and per-family archives.
-- Expand uploaded media flows beyond presigned URL generation.
-- Add profile-first archives where memories are grouped under loved ones.
+- Expand uploaded media flows into full photo/audio/video tabs under each person.
 - Add richer Bedrock prompt evaluation, guardrails, and model-selection controls.
 - Add transcript correction and richer async status UI for longer Transcribe jobs.
 - Add photo and video thumbnail generation Lambdas.
 - Generate shareable PDF/audio keepsake bundles.
-- Add family collaboration and multilingual review flows.
+- Add family collaboration and multilingual review flows beyond the Elder Mode page-language switcher.
