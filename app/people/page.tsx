@@ -99,6 +99,7 @@ export default function PeoplePage() {
   }, [people, query]);
 
   const activePerson = people.find((person) => person.key === activeKey) || filteredPeople[0] || people[0];
+  const activePhotoUrl = activePerson ? photoUrlFor(activePerson, photoPreviews) : "";
 
   async function submitProfile(event: FormEvent) {
     event.preventDefault();
@@ -234,17 +235,24 @@ export default function PeoplePage() {
                   <button
                     key={person.key}
                     onClick={() => setActiveKey(person.key)}
-                    className={`rounded-3xl border p-4 text-left transition ${
+                    className={`flex items-center gap-3 rounded-3xl border p-4 text-left transition ${
                       activePerson?.key === person.key
                         ? "border-rose-900/30 bg-white shadow-sm"
                         : "border-[#DFD0C0] bg-white/60 hover:bg-white"
                     }`}
                   >
-                    <p className="text-lg font-semibold text-stone-950">{person.personName}</p>
-                    <p className="mt-1 text-sm text-stone-500">{person.relationship} · {person.country || "No location yet"}</p>
-                    <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-rose-900">
-                      {person.memories.length} {person.memories.length === 1 ? "memory" : "memories"}
-                    </p>
+                    <Portrait
+                      name={person.personName}
+                      src={photoUrlFor(person, photoPreviews)}
+                      className="size-14 shrink-0"
+                    />
+                    <span>
+                      <span className="block text-lg font-semibold text-stone-950">{person.personName}</span>
+                      <span className="mt-1 block text-sm text-stone-500">{person.relationship} · {person.country || "No location yet"}</span>
+                      <span className="mt-3 block text-xs font-semibold uppercase tracking-[0.16em] text-rose-900">
+                        {person.memories.length} {person.memories.length === 1 ? "memory" : "memories"}
+                      </span>
+                    </span>
                   </button>
                 ))}
               </div>
@@ -254,10 +262,22 @@ export default function PeoplePage() {
               {activePerson ? (
                 <>
                   <div className="grid md:grid-cols-[0.42fr_0.58fr]">
-                    <div className="relative min-h-80 p-6 text-white" style={{ background: gradients[people.indexOf(activePerson) % gradients.length] }}>
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.28),transparent_34%)]" />
+                    <div
+                      className="relative min-h-80 overflow-hidden p-6 text-white"
+                      style={{
+                        background: activePhotoUrl
+                          ? `linear-gradient(180deg, rgba(28,16,8,0.08), rgba(28,16,8,0.74)), url(${activePhotoUrl}) center / cover`
+                          : gradients[people.indexOf(activePerson) % gradients.length],
+                      }}
+                    >
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.24),transparent_34%)]" />
                       <div className="relative flex h-full flex-col justify-between">
                         <div>
+                          <Portrait
+                            name={activePerson.personName}
+                            src={activePhotoUrl}
+                            className="mb-5 size-24 ring-4 ring-white/60"
+                          />
                           <p className="text-sm font-semibold uppercase tracking-[0.16em] text-white/75">{activePerson.relationship}</p>
                           <h2 className="mt-3 text-5xl font-semibold leading-tight">{activePerson.personName}</h2>
                           <p className="mt-3 flex items-center gap-2 text-white/82">
@@ -428,4 +448,38 @@ function buildPeople(profiles: PersonProfile[], memories: MemoryCard[]): PersonV
     const newestB = b.memories[0]?.createdAt || b.profile?.createdAt || "";
     return newestB.localeCompare(newestA);
   });
+}
+
+function photoUrlFor(person: PersonView, previews: PhotoPreview) {
+  const firstPhoto = person.photos[0];
+  return firstPhoto ? previews[firstPhoto.fileKey] || "" : "";
+}
+
+function Portrait({ name, src, className }: { name: string; src: string; className?: string }) {
+  return (
+    <span
+      className={`grid place-items-center overflow-hidden rounded-full bg-rose-100 text-lg font-semibold text-rose-950 ring-1 ring-white/30 ${className || ""}`}
+      style={
+        src
+          ? {
+              backgroundImage: `url(${src})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }
+          : undefined
+      }
+      aria-label={`${name} profile picture`}
+    >
+      {src ? null : initials(name)}
+    </span>
+  );
+}
+
+function initials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("") || "BF";
 }

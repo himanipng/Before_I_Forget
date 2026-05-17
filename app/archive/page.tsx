@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Database } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
-import { listMemories } from "@/lib/api";
-import type { MemoryCard } from "@/lib/types";
+import { getPhotoUrl, listMemories, listProfiles } from "@/lib/api";
+import type { MemoryCard, PersonProfile } from "@/lib/types";
 
 const GRADIENTS = [
   "linear-gradient(160deg, #C8A882 0%, #7A5030 45%, #3E2010 100%)",
@@ -23,14 +23,42 @@ function monthYear(iso: string) {
 
 export default function ArchivePage() {
   const [memories, setMemories] = useState<MemoryCard[]>([]);
+  const [profiles, setProfiles] = useState<PersonProfile[]>([]);
+  const [photoUrls, setPhotoUrls] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
   const [filters, setFilters] = useState({ relationship: "", country: "", memoryType: "", language: "" });
 
   useEffect(() => {
-    listMemories()
-      .then(setMemories)
+    Promise.all([listMemories(), listProfiles()])
+      .then(([nextMemories, nextProfiles]) => {
+        setMemories(nextMemories);
+        setProfiles(nextProfiles);
+      })
       .catch((caught) => setError(caught instanceof Error ? caught.message : "Unable to load memories."));
   }, []);
+
+  useEffect(() => {
+    const missingKeys = profiles
+      .flatMap((profile) => profile.photos.slice(0, 1))
+      .filter((photo) => photo.fileKey && !photoUrls[photo.fileKey])
+      .map((photo) => photo.fileKey);
+
+    if (!missingKeys.length) return;
+
+    Promise.all(
+      Array.from(new Set(missingKeys)).map(async (fileKey) => {
+        const signed = await getPhotoUrl(fileKey);
+        return [fileKey, signed.url] as const;
+      }),
+    )
+      .then((entries) => {
+        const next = Object.fromEntries(entries.filter(([, url]) => url));
+        if (Object.keys(next).length) {
+          setPhotoUrls((current) => ({ ...current, ...next }));
+        }
+      })
+      .catch(() => undefined);
+  }, [photoUrls, profiles]);
 
   const filtered = useMemo(() => {
     return memories.filter((m) =>
@@ -114,20 +142,12 @@ export default function ArchivePage() {
           {filtered.length > 0 ? (
             <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((memory, i) => (
-                <Link
+                <ArchiveMemoryCard
                   key={memory.memoryId}
-                  href={`/memory/${memory.memoryId}`}
-                  className="group block overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-[#E0D4C8] transition hover:-translate-y-0.5 hover:shadow-md"
-                >
-                  <div className="h-44 w-full" style={{ background: GRADIENTS[i % GRADIENTS.length] }} />
-                  <div className="p-5">
-                    <p className="text-[1.1rem] font-semibold text-stone-900">{memory.personName}</p>
-                    <p className="mt-0.5 text-sm text-stone-500">{memory.relationship} · {memory.country}</p>
-                    <p className="mt-3 text-[0.92rem] font-semibold leading-snug text-stone-800">{memory.title}</p>
-                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-stone-500">{memory.summary}</p>
-                    <p className="mt-4 text-xs text-stone-400">{monthYear(memory.createdAt)}</p>
-                  </div>
-                </Link>
+                  memory={memory}
+                  fallbackGradient={GRADIENTS[i % GRADIENTS.length]}
+                  photoUrl={photoUrlForMemory(memory, profiles, photoUrls)}
+                />
               ))}
             </div>
           ) : (
@@ -149,4 +169,75 @@ export default function ArchivePage() {
       </main>
     </>
   );
+}
+
+function ArchiveMemoryCard({
+  memory,
+  fallbackGradient,
+  photoUrl,
+}: {
+  memory: MemoryCard;
+  fallbackGradient: string;
+  photoUrl: string;
+}) {
+  return (
+    <Link
+      href={`/memory/${memory.memoryId}`}
+      className="group block overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-[#E0D4C8] transition hover:-translate-y-0.5 hover:shadow-md"
+    >
+      <div
+        className="relative h-44 w-full overflow-hidden"
+        style={{
+          background: photoUrl
+            ? `linear-gradient(180deg, rgba(28,16,8,0.04), rgba(28,16,8,0.48)), url(${photoUrl}) center / cover`
+            : fallbackGradient,
+        }}
+      >
+        <div className="absolute bottom-4 left-4 flex items-center gap-3">
+          <span
+            className="grid size-16 place-items-center overflow-hidden rounded-full bg-white/80 text-lg font-semibold text-rose-950 ring-4 ring-white/65 backdrop-blur-sm"
+            style={
+              photoUrl
+                ? {
+                    backgroundImage: `url(${photoUrl})`,
+                    backgroundPosition: "center",
+                    backgroundSize: "cover",
+                  }
+                : undefined
+            }
+          >
+            {photoUrl ? null : initials(memory.personName)}
+          </span>
+          <span>
+            <span className="block text-lg font-semibold text-white drop-shadow-sm">{memory.personName}</span>
+            <span className="block text-sm font-medium text-white/85 drop-shadow-sm">{memory.relationship} · {memory.country}</span>
+          </span>
+        </div>
+      </div>
+      <div className="p-5">
+        <p className="text-[0.92rem] font-semibold leading-snug text-stone-800">{memory.title}</p>
+        <p className="mt-2 line-clamp-2 text-sm leading-6 text-stone-500">{memory.summary}</p>
+        <p className="mt-4 text-xs text-stone-400">{monthYear(memory.createdAt)}</p>
+      </div>
+    </Link>
+  );
+}
+
+function photoUrlForMemory(memory: MemoryCard, profiles: PersonProfile[], photoUrls: Record<string, string>) {
+  const profile = profiles.find(
+    (person) =>
+      person.profileId === memory.personId ||
+      (!memory.personId && person.personName.toLowerCase() === memory.personName.toLowerCase()),
+  );
+  const firstPhoto = profile?.photos[0];
+  return firstPhoto ? photoUrls[firstPhoto.fileKey] || "" : "";
+}
+
+function initials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("") || "BF";
 }
