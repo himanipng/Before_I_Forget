@@ -13,6 +13,17 @@ type UploadBoxProps = {
   isBusy?: boolean;
 };
 
+function recordingMimeType() {
+  const options = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"];
+  return options.find((type) => MediaRecorder.isTypeSupported(type)) || "";
+}
+
+function extensionForMimeType(type: string) {
+  if (type.includes("mp4")) return "m4a";
+  if (type.includes("ogg")) return "ogg";
+  return "webm";
+}
+
 export function UploadBox({ fileName, fileKey, onFileNameChange, onFileKeyChange, onTranscribe, isBusy }: UploadBoxProps) {
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -23,6 +34,7 @@ export function UploadBox({ fileName, fileKey, onFileNameChange, onFileKeyChange
   async function uploadBlob(blob: Blob, name: string) {
     setUploading(true);
     setMessage("Preparing secure S3 upload...");
+    onFileKeyChange?.("");
 
     try {
       const { uploadUrl, fileKey: nextFileKey } = await getUploadUrl(name, blob.type || "audio/webm");
@@ -39,7 +51,7 @@ export function UploadBox({ fileName, fileKey, onFileNameChange, onFileKeyChange
       onFileKeyChange?.(nextFileKey);
       setMessage("Audio is staged for Amazon Transcribe.");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Unable to upload audio.");
+      setMessage(error instanceof Error ? `Upload failed: ${error.message}` : "Upload failed. Unable to stage audio for Transcribe.");
     } finally {
       setUploading(false);
     }
@@ -51,8 +63,33 @@ export function UploadBox({ fileName, fileKey, onFileNameChange, onFileKeyChange
   }
 
   async function startRecording() {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const recorder = new MediaRecorder(stream);
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setMessage("This browser does not support in-browser recording. Upload an audio file instead.");
+      return;
+    }
+
+    if (typeof MediaRecorder === "undefined") {
+      setMessage("This browser does not support in-browser recording. Upload an audio file instead.");
+      return;
+    }
+
+    let stream: MediaStream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (error) {
+      setMessage(error instanceof Error ? `Recording failed: ${error.message}` : "Recording failed. Check microphone permission and try again.");
+      return;
+    }
+
+    const mimeType = recordingMimeType();
+    let recorder: MediaRecorder;
+    try {
+      recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+    } catch (error) {
+      stream.getTracks().forEach((track) => track.stop());
+      setMessage(error instanceof Error ? `Recording failed: ${error.message}` : "Recording failed. Upload an audio file instead.");
+      return;
+    }
     chunksRef.current = [];
     recorderRef.current = recorder;
 
@@ -64,8 +101,9 @@ export function UploadBox({ fileName, fileKey, onFileNameChange, onFileKeyChange
 
     recorder.onstop = async () => {
       stream.getTracks().forEach((track) => track.stop());
-      const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-      await uploadBlob(blob, `recorded-memory-${Date.now()}.webm`);
+      const type = recorder.mimeType || mimeType || "audio/webm";
+      const blob = new Blob(chunksRef.current, { type });
+      await uploadBlob(blob, `recorded-memory-${Date.now()}.${extensionForMimeType(type)}`);
     };
 
     recorder.start();
@@ -106,10 +144,10 @@ export function UploadBox({ fileName, fileKey, onFileNameChange, onFileKeyChange
           <button
             type="button"
             onClick={onTranscribe}
-            disabled={isBusy || uploading}
+            disabled={isBusy || uploading || !fileKey}
             className="inline-flex items-center justify-center gap-2 rounded-full bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-950 ring-1 ring-rose-900/15 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <Volume2 size={16} /> {isBusy ? "Transcribing..." : fileKey ? "Start Transcribe" : "Mock transcript"}
+            <Volume2 size={16} /> {isBusy ? "Transcribing..." : fileKey ? "Start Transcribe" : "Upload first"}
           </button>
         </div>
       </div>

@@ -1,5 +1,39 @@
 [
   {
+    "memoryId": "mem_1778992478811_4iq5pk",
+    "personName": "Nani",
+    "relationship": "grandparent",
+    "country": "India",
+    "language": "Hindi",
+    "memoryType": "recipe",
+    "title": "The Mornings She Made Warm",
+    "summary": "Every morning, she made chai before school, not just as a drink, but as a quiet way of showing care.",
+    "quote": "She made chai every morning before school. She crushed ginger with cardamom and waited until the kitchen smelled warm.",
+    "lesson": "Care is often shown through small routines.",
+    "culturalContext": "Chai can represent comfort, routine, and family care in many South Asian households.",
+    "followUpQuestion": "What is one routine from this person that you never want to forget?",
+    "gratitudeLetter": "Dear Nani, I do not think I realized back then how much those moments meant. What felt ordinary then feels precious now: the warmth, the routine, the way you made care visible without needing to explain it. Thank you for giving me a memory I can return to.",
+    "createdAt": "2026-05-17T04:34:38.811Z",
+    "status": "MOCK"
+  },
+  {
+    "memoryId": "mem_1778991979332_1ail49",
+    "personName": "Nani",
+    "relationship": "grandparent",
+    "country": "India",
+    "language": "Hindi",
+    "memoryType": "recipe",
+    "title": "The Mornings She Made Warm",
+    "summary": "Every morning, she made chai before school, not just as a drink, but as a quiet way of showing care.",
+    "quote": "She made chai every morning before school. She crushed ginger with cardamom and waited until the kitchen smelled warm.",
+    "lesson": "Care is often shown through small routines.",
+    "culturalContext": "Chai can represent comfort, routine, and family care in many South Asian households.",
+    "followUpQuestion": "What is one routine from this person that you never want to forget?",
+    "gratitudeLetter": "Dear Nani, I do not think I realized back then how much those moments meant. What felt ordinary then feels precious now: the warmth, the routine, the way you made care visible without needing to explain it. Thank you for giving me a memory I can return to.",
+    "createdAt": "2026-05-17T04:26:19.332Z",
+    "status": "MOCK"
+  },
+  {
     "personName": "Nani",
     "relationship": "grandparent",
     "country": "India",
@@ -22,6 +56,8 @@
     "followUpQuestion": "What did she put in the chai that made it taste like hers, and who taught her to make it that way?",
     "gratitudeLetter": "Dear Nani, I do not think I realized back then how much those mornings meant. I thought you were only making chai, but now I understand you were making the day feel safe before it began. Thank you for every cup, every early morning, and every quiet way you loved us without asking to be noticed.",
     "createdAt": "2026-05-16T17:28:08.970Z",
-    "audioUrl": "/audio/mock-letter-Joanna.mp3"
+    "audioUrl": "/audio/mock-letter-Joanna.mp3",
+    "memoryId": "7ab386a7-78ce-4eb4-a8c2-0db1ce21dbbd",
+    "status": "SUCCEEDED"
   }
 ]
