@@ -11,6 +11,37 @@ type UploadBoxProps = {
   onFileKeyChange?: (key: string) => void;
   onTranscribe: () => void;
   isBusy?: boolean;
+  labels?: Partial<UploadBoxLabels>;
+};
+
+type UploadBoxLabels = {
+  title: string;
+  description: string;
+  uploadAudio: string;
+  record: string;
+  stop: string;
+  uploadFirst: string;
+  startTranscribe: string;
+  transcribing: string;
+  unsupportedRecording: string;
+  preparingUpload: string;
+  staged: string;
+  recording: string;
+};
+
+const defaultLabels: UploadBoxLabels = {
+  title: "Voice note or phone-call audio",
+  description: "Record in-browser or upload a forwarded call file, then send it to Transcribe.",
+  uploadAudio: "Upload audio",
+  record: "Record",
+  stop: "Stop",
+  uploadFirst: "Upload first",
+  startTranscribe: "Start Transcribe",
+  transcribing: "Transcribing...",
+  unsupportedRecording: "This browser does not support in-browser recording. Upload an audio file instead.",
+  preparingUpload: "Preparing secure S3 upload...",
+  staged: "Audio is staged for Amazon Transcribe.",
+  recording: "Recording. Ask the question out loud, or capture a short call excerpt with permission.",
 };
 
 function recordingMimeType() {
@@ -24,7 +55,8 @@ function extensionForMimeType(type: string) {
   return "webm";
 }
 
-export function UploadBox({ fileName, fileKey, onFileNameChange, onFileKeyChange, onTranscribe, isBusy }: UploadBoxProps) {
+export function UploadBox({ fileName, fileKey, onFileNameChange, onFileKeyChange, onTranscribe, isBusy, labels }: UploadBoxProps) {
+  const text = { ...defaultLabels, ...(labels || {}) };
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -33,7 +65,7 @@ export function UploadBox({ fileName, fileKey, onFileNameChange, onFileKeyChange
 
   async function uploadBlob(blob: Blob, name: string) {
     setUploading(true);
-    setMessage("Preparing secure S3 upload...");
+    setMessage(text.preparingUpload);
     onFileKeyChange?.("");
 
     try {
@@ -49,7 +81,7 @@ export function UploadBox({ fileName, fileKey, onFileNameChange, onFileKeyChange
 
       onFileNameChange(name);
       onFileKeyChange?.(nextFileKey);
-      setMessage("Audio is staged for Amazon Transcribe.");
+      setMessage(text.staged);
     } catch (error) {
       setMessage(error instanceof Error ? `Upload failed: ${error.message}` : "Upload failed. Unable to stage audio for Transcribe.");
     } finally {
@@ -64,12 +96,12 @@ export function UploadBox({ fileName, fileKey, onFileNameChange, onFileKeyChange
 
   async function startRecording() {
     if (!navigator.mediaDevices?.getUserMedia) {
-      setMessage("This browser does not support in-browser recording. Upload an audio file instead.");
+      setMessage(text.unsupportedRecording);
       return;
     }
 
     if (typeof MediaRecorder === "undefined") {
-      setMessage("This browser does not support in-browser recording. Upload an audio file instead.");
+      setMessage(text.unsupportedRecording);
       return;
     }
 
@@ -108,7 +140,7 @@ export function UploadBox({ fileName, fileKey, onFileNameChange, onFileKeyChange
 
     recorder.start();
     setRecording(true);
-    setMessage("Recording. Ask the question out loud, or capture a short call excerpt with permission.");
+    setMessage(text.recording);
   }
 
   function stopRecording() {
@@ -124,13 +156,13 @@ export function UploadBox({ fileName, fileKey, onFileNameChange, onFileKeyChange
             <UploadCloud />
           </span>
           <div>
-            <p className="font-semibold text-stone-950">Voice note or phone-call audio</p>
-            <p className="text-sm text-stone-600">Record in-browser or upload a forwarded call file, then send it to Transcribe.</p>
+            <p className="font-semibold text-stone-950">{text.title}</p>
+            <p className="text-sm text-stone-600">{text.description}</p>
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
           <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-stone-950 ring-1 ring-stone-200 transition hover:bg-stone-50">
-            <UploadCloud size={16} /> Upload audio
+            <UploadCloud size={16} /> {text.uploadAudio}
             <input type="file" accept="audio/*,video/mp4" className="sr-only" onChange={(event) => selectFile(event.target.files?.[0] || null)} />
           </label>
           <button
@@ -139,7 +171,7 @@ export function UploadBox({ fileName, fileKey, onFileNameChange, onFileKeyChange
             disabled={uploading || isBusy}
             className="inline-flex items-center justify-center gap-2 rounded-full bg-rose-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-950 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {recording ? <Square size={16} /> : <Mic size={16} />} {recording ? "Stop" : "Record"}
+            {recording ? <Square size={16} /> : <Mic size={16} />} {recording ? text.stop : text.record}
           </button>
           <button
             type="button"
@@ -147,7 +179,7 @@ export function UploadBox({ fileName, fileKey, onFileNameChange, onFileKeyChange
             disabled={isBusy || uploading || !fileKey}
             className="inline-flex items-center justify-center gap-2 rounded-full bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-950 ring-1 ring-rose-900/15 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <Volume2 size={16} /> {isBusy ? "Transcribing..." : fileKey ? "Start Transcribe" : "Upload first"}
+            <Volume2 size={16} /> {isBusy ? text.transcribing : fileKey ? text.startTranscribe : text.uploadFirst}
           </button>
         </div>
       </div>
