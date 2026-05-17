@@ -8,6 +8,21 @@ import type { MemoryCard } from "./types";
 const dataDir = path.join(process.cwd(), "data");
 const dataFile = path.join(dataDir, "memories.json");
 const mockMemories: MemoryCard[] = [];
+const AWS_STORAGE_TIMEOUT_MS = 5000;
+
+function withStorageTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
+  let timeout: ReturnType<typeof setTimeout>;
+
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      timeout = setTimeout(
+        () => reject(new Error(`${label} timed out; using local fallback.`)),
+        AWS_STORAGE_TIMEOUT_MS,
+      );
+    }),
+  ]).finally(() => clearTimeout(timeout));
+}
 
 async function ensureStore() {
   await fs.mkdir(dataDir, { recursive: true });
@@ -46,13 +61,20 @@ export async function saveMemory(memory: MemoryCard): Promise<MemoryCard> {
   const docClient = getDynamoDBDocumentClient();
 
   if (hasAwsConfig && docClient) {
-    await docClient.send(
-      new PutCommand({
-        TableName: env.DYNAMODB_TABLE_NAME,
-        Item: normalized,
-      }),
-    );
-    return normalized;
+    try {
+      await withStorageTimeout(
+        docClient.send(
+          new PutCommand({
+            TableName: env.DYNAMODB_TABLE_NAME,
+            Item: normalized,
+          }),
+        ),
+        "DynamoDB save",
+      );
+      return normalized;
+    } catch (error) {
+      console.warn(error instanceof Error ? error.message : "DynamoDB save failed; using local fallback.");
+    }
   }
 
   const memories = await readMockMemories();
@@ -66,13 +88,20 @@ export async function getMemory(memoryId: string): Promise<MemoryCard | null> {
   const docClient = getDynamoDBDocumentClient();
 
   if (hasAwsConfig && docClient) {
-    const result = await docClient.send(
-      new GetCommand({
-        TableName: env.DYNAMODB_TABLE_NAME,
-        Key: { memoryId },
-      }),
-    );
-    return result.Item ? (result.Item as MemoryCard) : null;
+    try {
+      const result = await withStorageTimeout(
+        docClient.send(
+          new GetCommand({
+            TableName: env.DYNAMODB_TABLE_NAME,
+            Key: { memoryId },
+          }),
+        ),
+        "DynamoDB read",
+      );
+      return result.Item ? (result.Item as MemoryCard) : null;
+    } catch (error) {
+      console.warn(error instanceof Error ? error.message : "DynamoDB read failed; using local fallback.");
+    }
   }
 
   const memories = await readMockMemories();
@@ -83,12 +112,19 @@ export async function listMemories(): Promise<MemoryCard[]> {
   const docClient = getDynamoDBDocumentClient();
 
   if (hasAwsConfig && docClient) {
-    const result = await docClient.send(
-      new ScanCommand({
-        TableName: env.DYNAMODB_TABLE_NAME,
-      }),
-    );
-    return ((result.Items || []) as MemoryCard[]).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    try {
+      const result = await withStorageTimeout(
+        docClient.send(
+          new ScanCommand({
+            TableName: env.DYNAMODB_TABLE_NAME,
+          }),
+        ),
+        "DynamoDB list",
+      );
+      return ((result.Items || []) as MemoryCard[]).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    } catch (error) {
+      console.warn(error instanceof Error ? error.message : "DynamoDB list failed; using local fallback.");
+    }
   }
 
   const memories = await readMockMemories();

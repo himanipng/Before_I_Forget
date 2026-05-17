@@ -30,9 +30,7 @@ export async function POST(request: Request) {
 
     const result = await startMemoryWorkflow(input);
 
-    if (result.mock && result.memoryCard) {
-      result.memoryCard = await saveMemory(result.memoryCard);
-    }
+    result.memoryCard = await saveMemory(result.memoryCard);
 
     return NextResponse.json<ApiResponse<typeof result>>({ success: true, data: result });
   } catch (error) {

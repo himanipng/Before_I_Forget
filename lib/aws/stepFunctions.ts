@@ -4,24 +4,52 @@ import { generateMockMemoryCard } from "@/lib/mockMemory";
 import type { MemoryCard, MemoryInput } from "@/lib/types";
 import { getSFNClient } from "./clients";
 
+const START_WORKFLOW_TIMEOUT_MS = 8000;
+
+type StartMemoryWorkflowResult = {
+  executionArn?: string;
+  memoryCard: MemoryCard;
+  mock: boolean;
+  warning?: string;
+};
+
 export async function startMemoryWorkflow(
   input: MemoryInput,
-): Promise<{ executionArn?: string; memoryCard?: MemoryCard; mock: boolean }> {
+): Promise<StartMemoryWorkflowResult> {
   const sfnClient = getSFNClient();
+  const memoryCard = generateMockMemoryCard(input);
 
   if (hasStepFunctionConfig && sfnClient) {
-    const result = await sfnClient.send(
-      new StartExecutionCommand({
-        stateMachineArn: env.STEP_FUNCTION_ARN,
-        input: JSON.stringify(input),
-      }),
-    );
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), START_WORKFLOW_TIMEOUT_MS);
 
-    return { executionArn: result.executionArn, mock: false };
+    try {
+      const result = await sfnClient.send(
+        new StartExecutionCommand({
+          stateMachineArn: env.STEP_FUNCTION_ARN,
+          input: JSON.stringify(input),
+        }),
+        { abortSignal: controller.signal },
+      );
+
+      return {
+        executionArn: result.executionArn,
+        memoryCard: { ...memoryCard, status: "RUNNING" },
+        mock: false,
+      };
+    } catch (error) {
+      return {
+        memoryCard,
+        mock: true,
+        warning: error instanceof Error ? error.message : "Step Functions did not start; using mock memory.",
+      };
+    } finally {
+      clearTimeout(timeout);
+    }
   }
 
   return {
-    memoryCard: generateMockMemoryCard(input),
+    memoryCard,
     mock: true,
   };
 }
