@@ -71,20 +71,6 @@ npm run dev
 
 Copy `.env.example` to `.env.local` when connecting real AWS services.
 
-## Judge Demo Script
-
-1. Open People and show that memories are organized by person.
-2. Create or open the “Nani” profile and upload a profile photo.
-3. Start a memory from Nani's profile so the memory attaches to her.
-4. Choose grandmother, India, Hindi, recipe.
-5. Record/upload audio or enter a short story about chai.
-6. Generate the memory card and show the gratitude letter.
-7. Open Archive and point out the profile photo on the saved memory card.
-8. Open Elder Mode and switch the page language to Hindi, Spanish, Mandarin, Arabic, Tagalog, Vietnamese, or French.
-9. Show the architecture page and the Lambda-centered snake workflow.
-10. Open `aws-workflow/` and point to the seven Lambda functions.
-11. Explain that Bedrock powers the emotional AI layer with a mock fallback for demo safety.
-
 ## API Routes
 
 - `POST /api/start-memory`
