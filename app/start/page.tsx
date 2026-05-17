@@ -140,17 +140,17 @@ export default function StartPage() {
       <main className="min-h-screen bg-[linear-gradient(180deg,#fff8f1,#f5e5d8)] px-4 py-8 sm:px-6">
         <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[0.82fr_1.18fr]">
           <aside className="lg:sticky lg:top-24 lg:self-start">
-            <div className="rounded-[2rem] bg-stone-950 p-6 text-white shadow-xl shadow-rose-950/15 sm:p-8">
-              <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm font-semibold text-rose-100">
+            <div className="rounded-[2rem] border border-rose-900/10 bg-white/88 p-6 text-stone-950 shadow-xl shadow-rose-950/10 sm:p-8">
+              <p className="inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1 text-sm font-semibold text-rose-900">
                 <Globe2 size={15} /> Judge demo
               </p>
               <h1 className="mt-5 text-4xl font-semibold leading-tight sm:text-5xl">Run one memory from input to archive.</h1>
-              <p className="mt-4 leading-7 text-rose-50/75">
+              <p className="mt-4 leading-7 text-stone-600">
                 The form is prefilled so the demo can start immediately. The workflow saves a card first, then the archive proves it persisted.
               </p>
               <div className="mt-6 grid gap-3">
                 {demoSteps.map(([Icon, label]) => (
-                  <div key={label} className="flex items-center gap-3 rounded-2xl bg-white/8 p-4 ring-1 ring-white/10">
+                  <div key={label} className="flex items-center gap-3 rounded-2xl bg-[#fff8f1] p-4 ring-1 ring-rose-900/10">
                     <span className="grid size-9 place-items-center rounded-full bg-rose-100 text-rose-950">
                       <Icon size={17} />
                     </span>
@@ -158,7 +158,7 @@ export default function StartPage() {
                   </div>
                 ))}
               </div>
-              <div className="mt-6 rounded-2xl bg-[#fff8f1] p-4 text-stone-950">
+              <div className="mt-6 rounded-2xl bg-rose-50 p-4 text-stone-950 ring-1 ring-rose-900/10">
                 <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-rose-900">
                   <CheckCircle2 size={16} /> Fallback safe
                 </p>

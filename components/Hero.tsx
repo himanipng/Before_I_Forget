@@ -45,14 +45,14 @@ export function Hero() {
           </div>
         </div>
         <div className="relative z-10 mx-auto w-full max-w-xl">
-          <div className="overflow-hidden rounded-[2rem] bg-stone-950 text-white shadow-2xl shadow-rose-950/15">
-            <div className="border-b border-white/10 bg-white/8 px-5 py-4">
+          <div className="overflow-hidden rounded-[2rem] border border-rose-900/10 bg-white/85 text-stone-950 shadow-2xl shadow-rose-950/12">
+            <div className="border-b border-rose-900/10 bg-[#fff8f1] px-5 py-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-rose-100/70">Live demo flow</p>
-                <h2 className="mt-1 text-2xl font-semibold">Nani&apos;s chai memory</h2>
+                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-rose-900">Live demo flow</p>
+                  <h2 className="mt-1 text-2xl font-semibold">Nani&apos;s chai memory</h2>
                 </div>
-                <span className="rounded-full bg-emerald-400/15 px-3 py-1 text-sm font-semibold text-emerald-100">Ready</span>
+                <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800">Ready</span>
               </div>
             </div>
             <div className="grid gap-4 p-5">
@@ -61,22 +61,22 @@ export function Hero() {
                   <div className="grid size-9 place-items-center rounded-full bg-rose-100 text-rose-950">
                     {index === 0 ? <Mic size={17} /> : index === 1 ? <GitBranch size={17} /> : <Database size={17} />}
                   </div>
-                  <div className="rounded-2xl bg-white/8 p-4 ring-1 ring-white/10">
+                  <div className="rounded-2xl bg-[#fff8f1] p-4 ring-1 ring-rose-900/10">
                     <p className="font-semibold">{title}</p>
-                    <p className="mt-1 text-sm leading-6 text-rose-50/75">{detail}</p>
+                    <p className="mt-1 text-sm leading-6 text-stone-600">{detail}</p>
                   </div>
                 </div>
               ))}
-              <div className="rounded-2xl bg-[#fff8f1] p-5 text-stone-950">
+              <div className="rounded-2xl bg-rose-50 p-5 text-stone-950 ring-1 ring-rose-900/10">
                 <p className="text-sm font-semibold uppercase tracking-[0.16em] text-rose-900">Output preview</p>
                 <h3 className="mt-3 text-2xl font-semibold">The Mornings She Made Warm</h3>
                 <p className="mt-3 leading-7 text-stone-700">&ldquo;She made chai every morning before school.&rdquo;</p>
               </div>
-              <div className="flex items-center gap-3 rounded-2xl border border-white/10 p-4">
-                <Cloud size={19} className="text-rose-100" />
+              <div className="flex items-center gap-3 rounded-2xl border border-rose-900/10 bg-white p-4">
+                <Cloud size={19} className="text-rose-900" />
                 <div>
                   <p className="font-semibold">AWS path is visible</p>
-                  <p className="text-sm text-rose-50/70">S3, Transcribe, Translate, Step Functions, Lambda, DynamoDB</p>
+                  <p className="text-sm text-stone-600">S3, Transcribe, Translate, Step Functions, Lambda, DynamoDB</p>
                 </div>
               </div>
             </div>

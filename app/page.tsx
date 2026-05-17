@@ -68,12 +68,12 @@ export default function Home() {
           </div>
         </Section>
         <Section eyebrow="AWS proof points" title="The frontend stays simple because the workflow is serverless.">
-          <div className="rounded-[2rem] bg-stone-950 p-6 text-white shadow-xl shadow-stone-950/10 sm:p-8">
+          <div className="rounded-[2rem] border border-rose-900/10 bg-white p-6 text-stone-950 shadow-xl shadow-rose-950/8 sm:p-8">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
               {["S3 uploads", "Transcribe", "Translate", "Step Functions", "DynamoDB"].map((service) => (
-                <div key={service} className="rounded-2xl bg-white/8 p-4 ring-1 ring-white/10">
+                <div key={service} className="rounded-2xl bg-[#fff8f1] p-4 ring-1 ring-rose-900/10">
                   <p className="font-semibold">{service}</p>
-                  <p className="mt-2 text-sm leading-6 text-stone-300">SDK v3-ready integration point.</p>
+                  <p className="mt-2 text-sm leading-6 text-stone-600">SDK v3-ready integration point.</p>
                 </div>
               ))}
             </div>

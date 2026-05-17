@@ -35,13 +35,13 @@ export default function ArchivePage() {
       <Navbar />
       <main className="min-h-screen bg-[linear-gradient(180deg,#fff8f1,#fffaf5)] px-4 py-8 sm:px-6">
         <div className="mx-auto max-w-7xl">
-          <section className="grid gap-5 rounded-[2rem] bg-stone-950 p-6 text-white shadow-xl shadow-rose-950/12 lg:grid-cols-[1fr_0.9fr]">
+          <section className="grid gap-5 rounded-[2rem] border border-rose-900/10 bg-white/88 p-6 text-stone-950 shadow-xl shadow-rose-950/10 lg:grid-cols-[1fr_0.9fr]">
             <div>
-              <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-rose-100">
+              <p className="inline-flex items-center gap-2 rounded-full bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-900">
                 <Archive size={16} /> Archive
               </p>
               <h1 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight sm:text-6xl">Saved memories from the workflow.</h1>
-              <p className="mt-4 max-w-2xl leading-7 text-rose-50/75">
+              <p className="mt-4 max-w-2xl leading-7 text-stone-600">
                 This is the judging proof screen: after Start Memory runs, the newest DynamoDB-backed keepsake appears here.
               </p>
             </div>
@@ -51,8 +51,8 @@ export default function ArchivePage() {
                 ["Showing", filtered.length],
                 ["Countries", unique("country").length],
               ].map(([label, value]) => (
-                <div key={label} className="rounded-2xl bg-white/8 p-4 ring-1 ring-white/10">
-                  <p className="text-sm text-rose-50/65">{label}</p>
+                <div key={label} className="rounded-2xl bg-[#fff8f1] p-4 ring-1 ring-rose-900/10">
+                  <p className="text-sm text-stone-600">{label}</p>
                   <p className="mt-1 text-3xl font-semibold">{value}</p>
                 </div>
               ))}
