@@ -1,20 +1,23 @@
-import { Brain, Cloud, Database, FileAudio, Languages, Mic, Server, Volume2 } from "lucide-react";
+import { Brain, Cloud, Database, FileAudio, GitBranch, Languages, Mic, Server, Volume2, Zap } from "lucide-react";
 
 const nodes = [
-  { title: "User uploads voice/photo", detail: "Family story, recipe, letter", icon: Mic },
-  { title: "Next.js frontend", detail: "App Router demo flow", icon: Cloud },
-  { title: "API route / Lambda handler", detail: "Serverless contracts", icon: Server },
-  { title: "S3 stores file", detail: "Audio and keepsake media", icon: FileAudio },
-  { title: "Transcribe creates transcript", detail: "Voice story to text", icon: FileAudio },
-  { title: "Translate converts language", detail: "Cross-language access", icon: Languages },
-  { title: "Mock AI memory layer", detail: "Later: Amazon Bedrock", icon: Brain },
-  { title: "Polly creates audio letter", detail: "Spoken gratitude", icon: Volume2 },
-  { title: "DynamoDB stores metadata", detail: "Memory cards and sessions", icon: Database },
+  { title: "User starts a memory", detail: "Story, recipe, gratitude, or voice note", icon: Mic },
+  { title: "Next.js frontend", detail: "Vercel UI only; no AWS secrets in browser", icon: Cloud },
+  { title: "Secure API route", detail: "Server-side bridge signs AWS requests", icon: Server },
+  { title: "Step Functions", detail: "Starts the Lambda chain for story processing", icon: GitBranch },
+  { title: "Lambda: create session", detail: "Creates memory/session IDs and status", icon: Zap },
+  { title: "Lambda: process story", detail: "Normalizes story text and metadata", icon: Zap },
+  { title: "Lambda: mock transcript", detail: "Transcribe-ready voice-to-text boundary", icon: FileAudio },
+  { title: "Lambda: mock translate", detail: "Translate-ready multilingual boundary", icon: Languages },
+  { title: "Lambda: mock memory AI", detail: "Bedrock will replace this AI layer later", icon: Brain },
+  { title: "Lambda: gratitude letter", detail: "Creates the emotional keepsake letter", icon: Zap },
+  { title: "Lambda: save result", detail: "Writes final MemoryCard to DynamoDB", icon: Database },
+  { title: "S3 + Polly ready", detail: "Presigned uploads and spoken letters", icon: Volume2 },
 ];
 
 export function ArchitectureDiagram() {
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-4">
       {nodes.map((node, index) => {
         const Icon = node.icon;
         return (

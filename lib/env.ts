@@ -5,6 +5,8 @@ const serverEnv = {
   S3_BUCKET_NAME: process.env.S3_BUCKET_NAME || "",
   DYNAMODB_TABLE_NAME: process.env.DYNAMODB_TABLE_NAME || "",
   STEP_FUNCTION_ARN: process.env.STEP_FUNCTION_ARN || "",
+  TRANSCRIBE_LANGUAGE_CODE: process.env.TRANSCRIBE_LANGUAGE_CODE || "",
+  POLLY_VOICE_ID: process.env.POLLY_VOICE_ID || "",
   NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || "",
 };
 
@@ -17,6 +19,8 @@ export const hasAwsConfig = Boolean(
 
 export const hasS3Config = hasAwsConfig && Boolean(serverEnv.S3_BUCKET_NAME);
 export const hasStepFunctionConfig = hasAwsConfig && Boolean(serverEnv.STEP_FUNCTION_ARN);
+export const hasTranscribeConfig = hasS3Config;
+export const hasTranslateConfig = hasAwsConfig;
 
 export const env = serverEnv;
 

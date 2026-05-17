@@ -23,7 +23,9 @@ export default function InterviewPage() {
   const [session, setSession] = useState<Session | null>(null);
   const [answers, setAnswers] = useState<string[]>([]);
   const [fileName, setFileName] = useState("nani-chai-story.m4a");
+  const [fileKey, setFileKey] = useState("");
   const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState("");
 
   useEffect(() => {
     const raw = localStorage.getItem("beforeIForget.session");
@@ -39,19 +41,37 @@ export default function InterviewPage() {
   }, [router]);
 
   async function transcribe() {
+    if (!session) return;
     setBusy(true);
-    const response = await fetch("/api/transcribe", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fileName }),
-    });
-    const data = await response.json();
+    setStatus(fileKey ? "Starting Amazon Transcribe job..." : "Using mock transcript...");
+
+    try {
+      const response = await fetch("/api/transcribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileName, fileKey, language: session.language, identifyLanguage: true }),
+      });
+      const data = await response.json();
+
+      if (data.mode === "async" && data.jobName) {
+        setStatus("Transcribe is listening. This may take a moment...");
+        const transcript = await waitForTranscript(data.jobName);
+        fillFirstAnswer(transcript || "Transcription job started. Refresh status in AWS Transcribe if the transcript is still processing.");
+      } else {
+        fillFirstAnswer(data.transcript);
+      }
+    } finally {
+      setStatus("");
+      setBusy(false);
+    }
+  }
+
+  function fillFirstAnswer(transcript: string) {
     setAnswers((current) => {
       const next = [...current];
-      next[0] = data.transcript;
+      next[0] = transcript;
       return next;
     });
-    setBusy(false);
   }
 
   async function generateCard() {
@@ -90,7 +110,15 @@ export default function InterviewPage() {
             </div>
           </aside>
           <section className="space-y-5">
-            <UploadBox fileName={fileName} onFileNameChange={setFileName} onTranscribe={transcribe} isBusy={busy} />
+            <UploadBox
+              fileName={fileName}
+              fileKey={fileKey}
+              onFileNameChange={setFileName}
+              onFileKeyChange={setFileKey}
+              onTranscribe={transcribe}
+              isBusy={busy}
+            />
+            {status ? <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">{status}</p> : null}
             <InterviewQuestionList
               questions={session.questions}
               answers={answers}
@@ -104,4 +132,22 @@ export default function InterviewPage() {
       </main>
     </>
   );
+}
+
+async function waitForTranscript(jobName: string) {
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    await new Promise((resolve) => setTimeout(resolve, attempt === 0 ? 1200 : 3000));
+    const response = await fetch(`/api/transcribe?jobName=${encodeURIComponent(jobName)}`);
+    const data = await response.json();
+
+    if (data.status === "COMPLETED") {
+      return data.transcript || "";
+    }
+
+    if (data.status === "FAILED") {
+      throw new Error(data.failureReason || "Amazon Transcribe failed for this audio.");
+    }
+  }
+
+  return "";
 }

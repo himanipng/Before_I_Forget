@@ -33,16 +33,28 @@ export default function MemoryPage() {
   async function translate() {
     if (!memory) return;
     setBusy("translate");
-    const response = await fetch("/api/translate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: memory.summary, sourceLanguage: memory.language, targetLanguage: "English" }),
-    });
-    const data = await response.json();
-    const next = { ...memory, translatedText: data.translatedText };
-    setMemory(next);
-    localStorage.setItem("beforeIForget.pendingMemory", JSON.stringify(next));
-    setBusy("");
+    setError("");
+
+    try {
+      const response = await fetch("/api/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: memory.summary, sourceLanguage: memory.language, targetLanguage: "English" }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to translate this memory.");
+      }
+
+      const next = { ...memory, translatedText: data.translatedText };
+      setMemory(next);
+      localStorage.setItem("beforeIForget.pendingMemory", JSON.stringify(next));
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Unable to translate this memory.");
+    } finally {
+      setBusy("");
+    }
   }
 
   async function generateAudio() {
@@ -106,6 +118,7 @@ export default function MemoryPage() {
                 <button onClick={generateAudio} disabled={busy === "audio"} className="action-button"><Volume2 size={17} /> {busy === "audio" ? "Generating..." : "Generate audio"}</button>
                 <button onClick={save} disabled={busy === "save"} className="action-button"><Save size={17} /> {saved ? "Saved" : busy === "save" ? "Saving..." : "Save memory"}</button>
                 <button onClick={downloadKeepsake} className="action-button"><Download size={17} /> Download keepsake</button>
+                {error ? <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">{error}</p> : null}
               </div>
             }
           />

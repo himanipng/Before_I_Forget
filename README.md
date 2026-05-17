@@ -14,9 +14,31 @@ Many families carry their most important history in voice notes, recipes, repeat
 - **Amazon Transcribe**: SDK-ready voice-to-text integration, mocked for local demo.
 - **Amazon Translate**: route contract and SDK-ready translation helper, mocked for local demo.
 - **Amazon Polly**: route contract and SDK-ready speech synthesis helper, mocked for local demo.
-- **DynamoDB-style storage**: clean storage abstraction for memory cards and sessions, backed by local JSON for demo.
+- **DynamoDB storage**: clean storage abstraction for memory cards and sessions, backed by DynamoDB when AWS env vars exist and local JSON/mock mode for safe demos.
 - **API Gateway/Lambda style**: each `app/api/*/route.ts` is structured as a serverless handler boundary.
 - **Cognito-ready auth placeholder**: the demo does not require login, but the data model is ready for user/session ownership.
+
+## Serverless With Lambda Focus
+
+The judging story is Lambda-first: the frontend starts a secure server-side request, Step Functions orchestrates the workflow, and seven Lambda functions transform a raw family memory into a saved keepsake.
+
+Live Step Functions ARN:
+
+```text
+arn:aws:states:us-west-2:085193942503:stateMachine:before-i-forget-memory-workflow
+```
+
+Lambda functions in `aws-workflow/lambdas/`:
+
+- `createMemorySession`
+- `processStoryInput`
+- `generateTranscriptMock`
+- `translateMemoryMock`
+- `generateMemoryCardMock`
+- `generateGratitudeLetterMock`
+- `saveMemoryResult`
+
+The final Lambda writes a MemoryCard-shaped result to DynamoDB. The Next.js `/api/workflow-status` route reads Step Functions completion and the Start Memory page opens the finished card when the workflow succeeds.
 
 ## Bedrock Later
 
@@ -47,7 +69,8 @@ Copy `.env.example` to `.env.local` when connecting real AWS services.
 5. Generate memory card
 6. Show gratitude letter
 7. Show architecture page
-8. Explain that Bedrock replaces the mock emotional AI layer
+8. Open `aws-workflow/` and point to the seven Lambda functions
+9. Explain that Bedrock replaces the mock emotional AI layer
 
 ## API Routes
 
@@ -62,6 +85,27 @@ Copy `.env.example` to `.env.local` when connecting real AWS services.
 - `GET /api/memories/[id]`
 - `POST /api/upload-url`
 - `GET /api/workflow-status`
+
+## Integration Status
+
+- [x] Merge Person 2 backend bridge into `main`.
+- [x] Merge Person 1 AWS workflow into `main`.
+- [x] Keep the Next.js app functional after both merges.
+- [x] Start Step Functions executions from server-side Next.js API routes.
+- [x] Poll Step Functions status from the Start Memory flow and open the finished card when ready.
+- [x] Store memory cards through DynamoDB when AWS env vars are configured.
+- [x] Generate S3 presigned upload URLs without exposing AWS secrets to the browser.
+- [x] Preserve local mock mode when AWS env vars are missing.
+- [x] Add SAM workflow files under `aws-workflow/`.
+- [x] Make the workflow `saveMemoryResult` Lambda persist MemoryCard-shaped results to DynamoDB.
+- [x] Add AWS Translate-backed `/api/translate` with mock fallback.
+- [x] Add AWS Transcribe-backed `/api/transcribe` for S3 audio files with mock fallback.
+- [x] Add browser recording/upload UI for voice notes and forwarded phone-call audio.
+- [ ] Replace mock AI with Bedrock.
+- [ ] Add profile-first data model and profile pages.
+- [ ] Add real media tabs for photos, audio, and video.
+- [ ] Add Cognito authentication.
+- [ ] Add production-grade media processing for thumbnails, transcripts, and video.
 
 ## Person 2 Backend Integration
 
@@ -103,12 +147,19 @@ The script creates/verifies:
 - IAM user `before-i-forget-vercel-api` with scoped DynamoDB, S3, and Step Functions permissions
 - One access key pair to paste into Vercel environment variables
 
+If Vercel can start a workflow but cannot poll it, rerun the provisioner in AWS CloudShell. Step Functions uses two resource types: `states:StartExecution` applies to the state machine ARN, while `states:DescribeExecution` applies to execution ARNs such as:
+
+```text
+arn:aws:states:us-west-2:085193942503:execution:before-i-forget-memory-workflow:*
+```
+
 ## Future Improvements
 
 - Add Cognito authentication and per-family archives.
-- Store uploaded media in S3 with signed upload URLs.
-- Persist memory cards in DynamoDB.
+- Expand uploaded media flows beyond presigned URL generation.
+- Add profile-first archives where memories are grouped under loved ones.
 - Replace mock AI with Bedrock prompts and guardrails.
-- Add real Transcribe job polling and transcript correction.
+- Add transcript correction and richer async status UI for longer Transcribe jobs.
+- Add photo and video thumbnail generation Lambdas.
 - Generate shareable PDF/audio keepsake bundles.
 - Add family collaboration and multilingual review flows.

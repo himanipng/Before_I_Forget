@@ -13,6 +13,7 @@ export function generateInterviewQuestions(input: StartInterviewInput): string[]
   const person = input.personName?.trim() || `your ${relationshipNames[input.relationship]}`;
   const place = input.country?.trim() || "home";
   const memory = input.memoryType;
+  const language = input.language || "their language";
   const goalPrompt =
     input.goal === "write thank-you letter"
       ? "what you wish you had thanked them for"
@@ -21,11 +22,29 @@ export function generateInterviewQuestions(input: StartInterviewInput): string[]
         : input.goal === "translate memory"
           ? "the words that may not translate easily"
           : "the part of the story that should stay in the family";
+  const memorySpecific =
+    memory === "recipe"
+      ? `What ingredients, gestures, measurements, or kitchen sounds made ${person}'s recipe feel like home?`
+      : memory === "hardship"
+        ? `What did ${person} survive or carry quietly that younger family members may not fully understand yet?`
+        : memory === "gratitude"
+          ? `What is one thank-you you would want ${person} to hear in ${language} if you could say it today?`
+          : memory === "advice"
+            ? `What advice did ${person} repeat, and when did you finally understand why it mattered?`
+            : memory === "childhood memory"
+              ? `What did ${person}'s childhood in ${place} look, sound, or smell like?`
+              : `What detail from this ${memory} would help someone feel like they were there with ${person}?`;
+  const preservationPrompt =
+    input.goal === "create audio keepsake"
+      ? `If this becomes an audio keepsake, what phrase, laugh, pause, or accent should the recording preserve?`
+      : input.goal === "translate memory"
+        ? `Which word, phrase, or feeling in ${language} needs extra care when translated for the family?`
+        : `What part of this memory should never be shortened or smoothed over?`;
 
   return [
     `When you think of ${person} in ${place}, what is the first small scene that comes back to you?`,
-    `What did ${person} teach you through this ${memory}, even if they never said it directly?`,
-    `What smell, sound, food, phrase, or routine belongs inside this memory?`,
+    memorySpecific,
+    preservationPrompt,
     `Was there a hard or tender moment behind this story that younger family members might not know?`,
     `If you could ask one more question about ${goalPrompt}, what would you ask?`,
   ];

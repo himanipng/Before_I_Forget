@@ -8,6 +8,7 @@ TABLE_NAME="${DYNAMODB_TABLE_NAME:-BeforeIForgetMemories}"
 BUCKET_NAME="${S3_BUCKET_NAME:-before-i-forget-uploads-${AWS_ACCOUNT_ID:-$(aws sts get-caller-identity --query Account --output text)}-${REGION}}"
 USER_NAME="${IAM_USER_NAME:-before-i-forget-vercel-api}"
 POLICY_NAME="${IAM_POLICY_NAME:-BeforeIForgetVercelApiPolicy}"
+STATE_MACHINE_NAME="${STEP_FUNCTION_NAME:-before-i-forget-memory-workflow}"
 
 ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
 BUCKET_NAME="${BUCKET_NAME//_/-}"
@@ -39,6 +40,20 @@ aws s3api put-public-access-block \
   --bucket "$BUCKET_NAME" \
   --public-access-block-configuration BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
 
+aws s3api put-bucket-cors \
+  --bucket "$BUCKET_NAME" \
+  --cors-configuration '{
+    "CORSRules": [
+      {
+        "AllowedHeaders": ["*"],
+        "AllowedMethods": ["PUT", "GET", "HEAD"],
+        "AllowedOrigins": ["*"],
+        "ExposeHeaders": ["ETag"],
+        "MaxAgeSeconds": 3000
+      }
+    ]
+  }'
+
 if ! aws iam get-user --user-name "$USER_NAME" >/dev/null 2>&1; then
   aws iam create-user --user-name "$USER_NAME" >/dev/null
 fi
@@ -63,15 +78,39 @@ cat > "$POLICY_DOCUMENT" <<JSON
         "s3:PutObject",
         "s3:GetObject"
       ],
-      "Resource": "arn:aws:s3:::${BUCKET_NAME}/uploads/*"
+      "Resource": [
+        "arn:aws:s3:::${BUCKET_NAME}/uploads/*",
+        "arn:aws:s3:::${BUCKET_NAME}/transcripts/*"
+      ]
     },
     {
       "Effect": "Allow",
       "Action": [
-        "states:StartExecution",
-        "states:DescribeExecution"
+        "transcribe:StartTranscriptionJob",
+        "transcribe:GetTranscriptionJob"
       ],
       "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "translate:TranslateText"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "states:StartExecution"
+      ],
+      "Resource": "arn:aws:states:${REGION}:${ACCOUNT_ID}:stateMachine:${STATE_MACHINE_NAME}"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "states:DescribeExecution"
+      ],
+      "Resource": "arn:aws:states:${REGION}:${ACCOUNT_ID}:execution:${STATE_MACHINE_NAME}:*"
     }
   ]
 }
@@ -110,4 +149,8 @@ Optional public variable:
 NEXT_PUBLIC_API_BASE_URL=
 
 Keep AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY server-only. Do not prefix them with NEXT_PUBLIC_.
+
+Step Functions IAM note:
+states:StartExecution is scoped to arn:aws:states:${REGION}:${ACCOUNT_ID}:stateMachine:${STATE_MACHINE_NAME}
+states:DescribeExecution is scoped to arn:aws:states:${REGION}:${ACCOUNT_ID}:execution:${STATE_MACHINE_NAME}:*
 EOF
