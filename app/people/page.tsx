@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Camera, Heart, ImagePlus, Loader2, MapPin, Plus, UploadCloud } from "lucide-react";
+import { ArrowRight, Camera, Heart, ImagePlus, Loader2, MapPin, NotebookText, Plus, Search, UploadCloud } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import {
   addProfilePhoto,
@@ -16,8 +16,27 @@ import type { Language, MemoryCard, PersonPhoto, PersonProfile, Relationship } f
 
 const relationships: Relationship[] = ["parent", "grandparent", "friend", "sibling", "teacher", "other"];
 const languages: Language[] = ["English", "Hindi", "Spanish", "Mandarin", "Arabic", "Tagalog", "Vietnamese", "French", "other"];
+const gradients = [
+  "linear-gradient(145deg, #9F6B42 0%, #5A321D 100%)",
+  "linear-gradient(145deg, #8A9A8F 0%, #35463E 100%)",
+  "linear-gradient(145deg, #B9896A 0%, #653827 100%)",
+  "linear-gradient(145deg, #9B8A62 0%, #4A3C22 100%)",
+];
 
 type PhotoPreview = Record<string, string>;
+
+type PersonView = {
+  key: string;
+  profile?: PersonProfile;
+  personName: string;
+  relationship: Relationship;
+  country: string;
+  language: Language;
+  birthday?: string;
+  notes?: string;
+  photos: PersonPhoto[];
+  memories: MemoryCard[];
+};
 
 const emptyProfile = {
   personName: "",
@@ -31,7 +50,8 @@ const emptyProfile = {
 export default function PeoplePage() {
   const [profiles, setProfiles] = useState<PersonProfile[]>([]);
   const [memories, setMemories] = useState<MemoryCard[]>([]);
-  const [activeId, setActiveId] = useState("");
+  const [activeKey, setActiveKey] = useState("");
+  const [query, setQuery] = useState("");
   const [form, setForm] = useState(emptyProfile);
   const [photoPreviews, setPhotoPreviews] = useState<PhotoPreview>({});
   const [busy, setBusy] = useState("");
@@ -42,7 +62,6 @@ export default function PeoplePage() {
       .then(([nextProfiles, nextMemories]) => {
         setProfiles(nextProfiles);
         setMemories(nextMemories);
-        setActiveId((current) => current || nextProfiles[0]?.profileId || "");
       })
       .catch((caught) => setError(caught instanceof Error ? caught.message : "Unable to load people."));
   }, []);
@@ -70,15 +89,16 @@ export default function PeoplePage() {
       .catch(() => undefined);
   }, [photoPreviews, profiles]);
 
-  const activeProfile = profiles.find((profile) => profile.profileId === activeId) || profiles[0];
-  const profileMemories = useMemo(() => {
-    if (!activeProfile) return [];
-    return memories.filter(
-      (memory) =>
-        memory.personId === activeProfile.profileId ||
-        (!memory.personId && memory.personName.toLowerCase() === activeProfile.personName.toLowerCase()),
+  const people = useMemo(() => buildPeople(profiles, memories), [profiles, memories]);
+  const filteredPeople = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    if (!needle) return people;
+    return people.filter((person) =>
+      `${person.personName} ${person.relationship} ${person.country} ${person.language}`.toLowerCase().includes(needle),
     );
-  }, [activeProfile, memories]);
+  }, [people, query]);
+
+  const activePerson = people.find((person) => person.key === activeKey) || filteredPeople[0] || people[0];
 
   async function submitProfile(event: FormEvent) {
     event.preventDefault();
@@ -88,7 +108,7 @@ export default function PeoplePage() {
     try {
       const profile = await createProfile(form);
       setProfiles((current) => [profile, ...current.filter((item) => item.profileId !== profile.profileId)]);
-      setActiveId(profile.profileId);
+      setActiveKey(profile.profileId);
       setForm(emptyProfile);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Unable to create profile.");
@@ -98,7 +118,7 @@ export default function PeoplePage() {
   }
 
   async function uploadPhoto(file: File | null) {
-    if (!file || !activeProfile) return;
+    if (!file || !activePerson?.profile) return;
     setBusy("photo");
     setError("");
 
@@ -119,7 +139,7 @@ export default function PeoplePage() {
         contentType: file.type || "image/jpeg",
         uploadedAt: new Date().toISOString(),
       };
-      const nextProfile = await addProfilePhoto(activeProfile.profileId, photo);
+      const nextProfile = await addProfilePhoto(activePerson.profile.profileId, photo);
       const localPreview = URL.createObjectURL(file);
       setPhotoPreviews((current) => ({ ...current, [photo.fileKey]: localPreview }));
       setProfiles((current) => current.map((item) => (item.profileId === nextProfile.profileId ? nextProfile : item)));
@@ -133,34 +153,35 @@ export default function PeoplePage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-[linear-gradient(180deg,#fff8f1,#f5e5d8)] px-4 py-10 sm:px-6">
+      <main className="min-h-screen bg-[linear-gradient(180deg,#fff8f1,#f3e2d3)] px-4 py-10 sm:px-6">
         <div className="mx-auto max-w-7xl">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="grid gap-6 lg:grid-cols-[0.76fr_1.24fr] lg:items-end">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose-900">People</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-rose-900">People</p>
               <h1
-                className="mt-2 max-w-3xl text-5xl leading-tight text-stone-900 sm:text-6xl"
+                className="mt-3 max-w-3xl text-5xl leading-tight text-stone-950 sm:text-6xl"
                 style={{ fontFamily: "var(--font-lora), Georgia, serif", fontStyle: "italic" }}
               >
-                Build a profile before the memories.
+                Open the archive by person.
               </h1>
-              <p className="mt-3 max-w-2xl leading-7 text-stone-600">
-                Create a person, add photos that belong to them, then start memories that stay connected to their profile.
+              <p className="mt-4 max-w-2xl text-lg leading-8 text-stone-600">
+                Create a profile, add photos, and keep every saved memory attached to the person it belongs to.
               </p>
             </div>
-            {activeProfile ? (
-              <Link
-                href={`/start?personId=${encodeURIComponent(activeProfile.profileId)}`}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#881337] px-6 py-3 font-semibold text-white shadow-lg shadow-rose-950/15 transition hover:bg-[#4c0519]"
-              >
-                Add memory for {activeProfile.personName} <ArrowRight size={18} />
-              </Link>
-            ) : null}
+            <label className="relative block">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" size={20} />
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                className="w-full rounded-full border border-stone-200 bg-white/85 py-4 pl-12 pr-5 text-stone-900 shadow-sm outline-none transition focus:border-rose-700 focus:ring-4 focus:ring-rose-100"
+                placeholder="Search a person, country, or relationship"
+              />
+            </label>
           </div>
 
-          {error ? <p className="mt-5 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">{error}</p> : null}
+          {error ? <p className="mt-6 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">{error}</p> : null}
 
-          <div className="mt-8 grid gap-6 lg:grid-cols-[0.42fr_0.58fr]">
+          <div className="mt-8 grid gap-6 lg:grid-cols-[0.36fr_0.64fr]">
             <section className="space-y-5">
               <form onSubmit={submitProfile} className="rounded-[2rem] border border-[#DFD0C0] bg-white/80 p-5 shadow-sm">
                 <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-rose-900">
@@ -189,20 +210,12 @@ export default function PeoplePage() {
                       {languages.map((language) => <option key={language}>{language}</option>)}
                     </select>
                   </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <input
-                      value={form.country}
-                      onChange={(event) => setForm({ ...form, country: event.target.value })}
-                      className="field"
-                      placeholder="Country or hometown"
-                    />
-                    <input
-                      value={form.birthday}
-                      onChange={(event) => setForm({ ...form, birthday: event.target.value })}
-                      className="field"
-                      placeholder="Birthday or reminder"
-                    />
-                  </div>
+                  <input
+                    value={form.country}
+                    onChange={(event) => setForm({ ...form, country: event.target.value })}
+                    className="field"
+                    placeholder="Country or hometown"
+                  />
                   <textarea
                     value={form.notes}
                     onChange={(event) => setForm({ ...form, notes: event.target.value })}
@@ -217,105 +230,146 @@ export default function PeoplePage() {
               </form>
 
               <div className="grid gap-3">
-                {profiles.map((profile) => (
+                {filteredPeople.map((person) => (
                   <button
-                    key={profile.profileId}
-                    onClick={() => setActiveId(profile.profileId)}
-                    className={`rounded-2xl border p-4 text-left transition ${
-                      activeProfile?.profileId === profile.profileId
+                    key={person.key}
+                    onClick={() => setActiveKey(person.key)}
+                    className={`rounded-3xl border p-4 text-left transition ${
+                      activePerson?.key === person.key
                         ? "border-rose-900/30 bg-white shadow-sm"
                         : "border-[#DFD0C0] bg-white/60 hover:bg-white"
                     }`}
                   >
-                    <p className="font-semibold text-stone-950">{profile.personName}</p>
-                    <p className="mt-1 text-sm text-stone-500">{profile.relationship} · {profile.country || "No location yet"}</p>
+                    <p className="text-lg font-semibold text-stone-950">{person.personName}</p>
+                    <p className="mt-1 text-sm text-stone-500">{person.relationship} · {person.country || "No location yet"}</p>
+                    <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-rose-900">
+                      {person.memories.length} {person.memories.length === 1 ? "memory" : "memories"}
+                    </p>
                   </button>
                 ))}
               </div>
             </section>
 
-            <section className="rounded-[2rem] border border-[#DFD0C0] bg-white/80 p-5 shadow-sm">
-              {activeProfile ? (
+            <section className="overflow-hidden rounded-[2rem] bg-white shadow-sm ring-1 ring-stone-900/5">
+              {activePerson ? (
                 <>
-                  <div className="flex flex-col gap-4 border-b border-[#E7D8C7] pb-5 md:flex-row md:items-start md:justify-between">
+                  <div className="grid md:grid-cols-[0.42fr_0.58fr]">
+                    <div className="relative min-h-80 p-6 text-white" style={{ background: gradients[people.indexOf(activePerson) % gradients.length] }}>
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.28),transparent_34%)]" />
+                      <div className="relative flex h-full flex-col justify-between">
+                        <div>
+                          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-white/75">{activePerson.relationship}</p>
+                          <h2 className="mt-3 text-5xl font-semibold leading-tight">{activePerson.personName}</h2>
+                          <p className="mt-3 flex items-center gap-2 text-white/82">
+                            <MapPin size={17} /> {activePerson.country || "Location not set"}
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <span className="rounded-full bg-white/18 px-3 py-1 text-sm font-semibold backdrop-blur-sm">
+                            {activePerson.language}
+                          </span>
+                          {activePerson.birthday ? (
+                            <span className="rounded-full bg-white/18 px-3 py-1 text-sm font-semibold backdrop-blur-sm">
+                              {activePerson.birthday}
+                            </span>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-6">
+                      <div className="flex flex-wrap gap-3">
+                        <span className="inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1 text-sm font-semibold text-rose-950">
+                          <NotebookText size={16} /> {activePerson.memories.length} {activePerson.memories.length === 1 ? "memory" : "memories"}
+                        </span>
+                        <span className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-950">
+                          <Camera size={16} /> {activePerson.photos.length} photos
+                        </span>
+                      </div>
+                      {activePerson.notes ? <p className="mt-5 leading-7 text-stone-600">{activePerson.notes}</p> : null}
+                      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                        <Link
+                          href={activePerson.profile ? `/start?personId=${encodeURIComponent(activePerson.profile.profileId)}` : "/start"}
+                          className="inline-flex items-center justify-center gap-2 rounded-full bg-rose-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-950"
+                        >
+                          Add memory <ArrowRight size={17} />
+                        </Link>
+                        {activePerson.profile ? (
+                          <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-stone-800 ring-1 ring-stone-200 transition hover:bg-stone-50">
+                            {busy === "photo" ? <Loader2 size={17} className="animate-spin" /> : <ImagePlus size={17} />}
+                            Add photo
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(event) => uploadPhoto(event.target.files?.[0] || null)}
+                            />
+                          </label>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-6 border-t border-stone-900/10 p-6 xl:grid-cols-[0.45fr_0.55fr]">
                     <div>
-                      <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-rose-900">
-                        <MapPin size={16} /> {activeProfile.country || "Profile"}
-                      </p>
-                      <h2 className="mt-2 text-4xl font-semibold text-stone-950">{activeProfile.personName}</h2>
-                      <p className="mt-2 text-stone-600">{activeProfile.relationship} · {activeProfile.language}</p>
-                      {activeProfile.notes ? <p className="mt-4 max-w-2xl leading-7 text-stone-600">{activeProfile.notes}</p> : null}
+                      <div className="mb-3 flex items-center justify-between">
+                        <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-rose-900">
+                          <Camera size={16} /> Pictures
+                        </p>
+                        <span className="text-sm text-stone-500">{activePerson.photos.length} uploaded</span>
+                      </div>
+                      {activePerson.photos.length ? (
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          {activePerson.photos.slice(0, 4).map((photo) => (
+                            <div key={photo.id} className="overflow-hidden rounded-2xl bg-[#fff8f1] ring-1 ring-rose-900/10">
+                              {photoPreviews[photo.fileKey] ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={photoPreviews[photo.fileKey]} alt={photo.fileName} className="h-36 w-full object-cover" />
+                              ) : (
+                                <div className="grid h-36 place-items-center text-stone-500">
+                                  <UploadCloud size={28} />
+                                </div>
+                              )}
+                              <p className="truncate px-3 py-2 text-sm font-medium text-stone-700">{photo.fileName}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="rounded-2xl border border-dashed border-[#D4C4B4] bg-white/60 p-8 text-center">
+                          <Camera className="mx-auto text-rose-900" />
+                          <p className="mt-3 font-semibold text-stone-900">Add the first photo for {activePerson.personName}.</p>
+                        </div>
+                      )}
                     </div>
-                    <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-rose-900/15 bg-rose-50 px-5 py-3 font-semibold text-rose-950 transition hover:bg-rose-100">
-                      {busy === "photo" ? <Loader2 size={18} className="animate-spin" /> : <ImagePlus size={18} />}
-                      Upload picture
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(event) => uploadPhoto(event.target.files?.[0] || null)}
-                      />
-                    </label>
-                  </div>
 
-                  <div className="mt-6">
-                    <div className="mb-3 flex items-center justify-between">
-                      <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-rose-900">
-                        <Camera size={16} /> Pictures
-                      </p>
-                      <span className="text-sm text-stone-500">{activeProfile.photos.length} uploaded</span>
+                    <div>
+                      <div className="mb-3 flex items-center justify-between">
+                        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-rose-900">Memories</p>
+                        <span className="text-sm text-stone-500">{activePerson.memories.length} saved</span>
+                      </div>
+                      {activePerson.memories.length ? (
+                        <div className="grid gap-3">
+                          {activePerson.memories.map((memory) => (
+                            <Link
+                              key={memory.memoryId}
+                              href={`/memory/${memory.memoryId}`}
+                              className="rounded-2xl bg-[#fff8f1] p-4 ring-1 ring-rose-900/10 transition hover:bg-rose-50"
+                            >
+                              <p className="font-semibold text-stone-950">{memory.title}</p>
+                              <p className="mt-1 line-clamp-2 text-sm leading-6 text-stone-600">{memory.summary}</p>
+                            </Link>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="rounded-2xl bg-[#fff8f1] p-5 text-stone-700 ring-1 ring-rose-900/10">
+                          No memories are attached yet. Start one from this profile to keep it organized.
+                        </div>
+                      )}
                     </div>
-                    {activeProfile.photos.length ? (
-                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                        {activeProfile.photos.map((photo) => (
-                          <div key={photo.id} className="overflow-hidden rounded-2xl bg-[#fff8f1] ring-1 ring-rose-900/10">
-                            {photoPreviews[photo.fileKey] ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img src={photoPreviews[photo.fileKey]} alt={photo.fileName} className="h-40 w-full object-cover" />
-                            ) : (
-                              <div className="grid h-40 place-items-center text-stone-500">
-                                <UploadCloud size={28} />
-                              </div>
-                            )}
-                            <p className="truncate px-3 py-2 text-sm font-medium text-stone-700">{photo.fileName}</p>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="rounded-2xl border border-dashed border-[#D4C4B4] bg-white/60 p-8 text-center">
-                        <Camera className="mx-auto text-rose-900" />
-                        <p className="mt-3 font-semibold text-stone-900">Add the first photo for {activeProfile.personName}.</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="mt-8">
-                    <div className="mb-3 flex items-center justify-between">
-                      <p className="text-sm font-semibold uppercase tracking-[0.16em] text-rose-900">Memories</p>
-                      <span className="text-sm text-stone-500">{profileMemories.length} saved</span>
-                    </div>
-                    {profileMemories.length ? (
-                      <div className="grid gap-3">
-                        {profileMemories.map((memory) => (
-                          <Link
-                            key={memory.memoryId}
-                            href={`/memory/${memory.memoryId}`}
-                            className="rounded-2xl bg-[#fff8f1] p-4 ring-1 ring-rose-900/10 transition hover:bg-rose-50"
-                          >
-                            <p className="font-semibold text-stone-950">{memory.title}</p>
-                            <p className="mt-1 line-clamp-2 text-sm leading-6 text-stone-600">{memory.summary}</p>
-                          </Link>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="rounded-2xl bg-[#fff8f1] p-5 text-stone-700 ring-1 ring-rose-900/10">
-                        No memories are attached yet. Start one from this profile to keep it organized.
-                      </div>
-                    )}
                   </div>
                 </>
               ) : (
-                <div className="grid min-h-[28rem] place-items-center text-center">
+                <div className="grid min-h-[28rem] place-items-center p-8 text-center">
                   <div>
                     <Heart className="mx-auto text-rose-900" />
                     <h2 className="mt-4 text-2xl font-semibold text-stone-950">Create a profile to begin.</h2>
@@ -329,4 +383,49 @@ export default function PeoplePage() {
       </main>
     </>
   );
+}
+
+function buildPeople(profiles: PersonProfile[], memories: MemoryCard[]): PersonView[] {
+  const sortedMemories = [...memories].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const people: PersonView[] = profiles.map((profile) => ({
+    key: profile.profileId,
+    profile,
+    personName: profile.personName,
+    relationship: profile.relationship,
+    country: profile.country,
+    language: profile.language,
+    birthday: profile.birthday,
+    notes: profile.notes,
+    photos: profile.photos,
+    memories: sortedMemories.filter(
+      (memory) =>
+        memory.personId === profile.profileId ||
+        (!memory.personId && memory.personName.toLowerCase() === profile.personName.toLowerCase()),
+    ),
+  }));
+
+  for (const memory of sortedMemories) {
+    const alreadyAttached = people.some(
+      (person) =>
+        memory.personId === person.profile?.profileId ||
+        (!memory.personId && memory.personName.toLowerCase() === person.personName.toLowerCase()),
+    );
+    if (alreadyAttached) continue;
+
+    people.push({
+      key: `memory:${memory.personName.toLowerCase()}`,
+      personName: memory.personName,
+      relationship: memory.relationship,
+      country: memory.country,
+      language: memory.language,
+      photos: [],
+      memories: sortedMemories.filter((item) => item.personName.toLowerCase() === memory.personName.toLowerCase()),
+    });
+  }
+
+  return people.sort((a, b) => {
+    const newestA = a.memories[0]?.createdAt || a.profile?.createdAt || "";
+    const newestB = b.memories[0]?.createdAt || b.profile?.createdAt || "";
+    return newestB.localeCompare(newestA);
+  });
 }

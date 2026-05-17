@@ -18,13 +18,14 @@ export type ArchiveCardData = {
 
 export function ArchiveCard({ card }: { card: ArchiveCardData }) {
   return (
-    <Link href={card.href} className="group block overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-[#E0D4C8] transition hover:-translate-y-0.5 hover:shadow-md">
-      <div
-        className="relative h-52 w-full"
-        style={{ background: card.gradient }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-        <div className="absolute bottom-3 left-3 flex items-center gap-2">
+    <Link href={card.href} className="group grid overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-[#E0D4C8] transition hover:-translate-y-0.5 hover:shadow-md sm:grid-cols-[0.82fr_1.18fr]">
+      <div className="relative min-h-56 w-full" style={{ background: card.gradient }}>
+        <div className="absolute inset-0 bg-gradient-to-br from-black/10 via-transparent to-black/30" />
+        <div className="absolute left-4 top-4">
+          <p className="text-3xl font-semibold text-white drop-shadow-sm">{card.name}</p>
+          <p className="mt-1 text-sm font-medium text-white/85">{card.relationship} · {card.country}</p>
+        </div>
+        <div className="absolute bottom-4 left-4 flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-stone-800 backdrop-blur-sm">
             {card.category}
           </span>
@@ -34,11 +35,8 @@ export function ArchiveCard({ card }: { card: ArchiveCardData }) {
         </div>
       </div>
 
-      <div className="p-5">
-        <p className="text-[1.15rem] font-semibold text-stone-900">{card.name}</p>
-        <p className="mt-0.5 text-sm text-stone-500">{card.relationship} · {card.country}</p>
-
-        <p className="mt-3 text-[0.95rem] font-semibold leading-snug text-stone-800">
+      <div className="flex flex-col justify-between p-5">
+        <p className="text-[1.05rem] font-semibold leading-snug text-stone-900">
           {card.title}
         </p>
 

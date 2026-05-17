@@ -34,7 +34,7 @@ export default function StartPage() {
   });
   const [loading, setLoading] = useState(false);
   const [audioBusy, setAudioBusy] = useState(false);
-  const [fileName, setFileName] = useState("nani-chai-story.m4a");
+  const [fileName, setFileName] = useState("family-voice-note.m4a");
   const [fileKey, setFileKey] = useState("");
   const [audioStatus, setAudioStatus] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
@@ -213,7 +213,7 @@ export default function StartPage() {
             <div className="mb-6 flex flex-col gap-3 border-b border-stone-900/10 pb-6 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-rose-900">Memory setup</p>
-                <h2 className="mt-2 text-3xl font-semibold text-stone-950">Nani&apos;s chai story</h2>
+                <h2 className="mt-2 text-3xl font-semibold text-stone-950">A family memory</h2>
               </div>
               <button disabled={loading} className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-rose-900 px-6 py-4 font-semibold text-white shadow-lg shadow-rose-950/15 transition hover:bg-rose-950 disabled:opacity-60 sm:w-auto">
                 {loading ? "Starting memory..." : "Start workflow"} <ArrowRight size={18} />

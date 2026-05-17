@@ -100,7 +100,7 @@ export function generateMemoryCard(input: GenerateMemoryCardInput) {
 }
 
 export function simulateTranscript(fileName = "voice-note.m4a") {
-  return `Transcript from ${fileName}: My Nani made chai every morning before school. She crushed ginger with cardamom and waited until the whole kitchen smelled warm. I did not know it then, but it was her way of blessing the day.`;
+  return `Transcript from ${fileName}: They shared a small morning routine that made home feel safe. The details were simple: a familiar voice, a warm kitchen, and the quiet feeling of being cared for before the day began.`;
 }
 
 export function mockTranslate(text: string, targetLanguage: string) {

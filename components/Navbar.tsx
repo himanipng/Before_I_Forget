@@ -30,9 +30,15 @@ export function Navbar() {
           </Link>
           <Link
             href="/start"
-            className="flex items-center gap-1.5 rounded-full border border-[#D4AE80] bg-amber-50 px-4 py-1.5 text-sm font-medium text-amber-900 transition hover:bg-amber-100"
+            className="hidden items-center gap-1.5 rounded-full border border-[#D4AE80] bg-amber-50 px-4 py-1.5 text-sm font-medium text-amber-900 transition hover:bg-amber-100 lg:flex"
           >
             🔔 Nani&apos;s birthday — 21d
+          </Link>
+          <Link
+            href="/elder"
+            className="hidden rounded-full border border-[#D4C4B4] bg-white/60 px-4 py-1.5 text-sm font-medium text-stone-700 transition hover:bg-white md:inline-block"
+          >
+            Elder View
           </Link>
           <Link
             href="/start"

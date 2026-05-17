@@ -155,7 +155,7 @@ export function UploadBox({ fileName, fileKey, onFileNameChange, onFileKeyChange
         value={fileName}
         onChange={(event) => onFileNameChange(event.target.value)}
         className="mt-4 w-full rounded-2xl border border-stone-200 bg-white px-4 py-3 text-stone-900 outline-none transition focus:border-rose-600 focus:ring-4 focus:ring-rose-100"
-        placeholder="nani-chai-story.m4a"
+        placeholder="family-voice-note.m4a"
       />
       {fileKey ? <p className="mt-3 break-all text-xs font-medium text-stone-500">S3 key: {fileKey}</p> : null}
       {message ? <p className="mt-3 text-sm font-medium text-rose-900">{message}</p> : null}

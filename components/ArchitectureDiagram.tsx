@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { Brain, Cloud, Database, FileAudio, GitBranch, Languages, Mic, Server, Volume2, Zap } from "lucide-react";
 
 const nodes = [
@@ -15,26 +16,83 @@ const nodes = [
   { title: "S3 + Polly ready", detail: "Presigned uploads and spoken letters", icon: Volume2 },
 ];
 
+const desktopPlacement = [
+  { row: 1, col: 1, connector: "→" },
+  { row: 1, col: 2, connector: "→" },
+  { row: 1, col: 3, connector: "→" },
+  { row: 1, col: 4, connector: "↓" },
+  { row: 2, col: 4, connector: "←" },
+  { row: 2, col: 3, connector: "←" },
+  { row: 2, col: 2, connector: "←" },
+  { row: 2, col: 1, connector: "↓" },
+  { row: 3, col: 1, connector: "→" },
+  { row: 3, col: 2, connector: "→" },
+  { row: 3, col: 3, connector: "→" },
+  { row: 3, col: 4, connector: "" },
+];
+
+function connectorClass(connector: string) {
+  if (connector === "↓") return "-bottom-4 left-1/2 -translate-x-1/2";
+  if (connector === "←") return "-left-4 top-1/2 -translate-y-1/2";
+  if (connector === "→") return "-right-4 top-1/2 -translate-y-1/2";
+  return "";
+}
+
 export function ArchitectureDiagram() {
   return (
-    <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-4">
-      {nodes.map((node, index) => {
-        const Icon = node.icon;
-        return (
-          <div key={node.title} className="relative rounded-3xl border border-stone-900/10 bg-white p-5 shadow-sm">
-            {index < nodes.length - 1 ? (
-              <span className="absolute -right-3 top-1/2 z-10 hidden size-6 -translate-y-1/2 place-items-center rounded-full bg-rose-900 text-xs font-bold text-white md:grid">
-                →
-              </span>
-            ) : null}
-            <div className="mb-4 grid size-12 place-items-center rounded-2xl bg-rose-100 text-rose-950">
-              <Icon />
-            </div>
-            <h3 className="text-lg font-semibold text-stone-950">{node.title}</h3>
-            <p className="mt-2 text-sm leading-6 text-stone-600">{node.detail}</p>
-          </div>
-        );
-      })}
+    <>
+      <div className="grid gap-4 md:hidden">
+        {nodes.map((node, index) => (
+          <DiagramCard key={node.title} node={node} index={index} connector={index < nodes.length - 1 ? "↓" : ""} />
+        ))}
+      </div>
+
+      <div className="hidden gap-5 md:grid md:grid-cols-4">
+        {nodes.map((node, index) => {
+          const placement = desktopPlacement[index];
+          return (
+            <DiagramCard
+              key={node.title}
+              node={node}
+              index={index}
+              connector={placement.connector}
+              style={{ gridColumn: placement.col, gridRow: placement.row }}
+            />
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
+function DiagramCard({
+  node,
+  index,
+  connector,
+  style,
+}: {
+  node: (typeof nodes)[number];
+  index: number;
+  connector: string;
+  style?: CSSProperties;
+}) {
+  const Icon = node.icon;
+
+  return (
+    <div className="relative rounded-3xl border border-stone-900/10 bg-white p-5 shadow-sm" style={style}>
+      {connector ? (
+        <span className={`absolute z-10 grid size-7 place-items-center rounded-full bg-rose-900 text-sm font-bold text-white ${connectorClass(connector)}`}>
+          {connector}
+        </span>
+      ) : null}
+      <p className="mb-4 text-xs font-bold tracking-[0.18em] text-rose-900">
+        {String(index + 1).padStart(2, "0")}
+      </p>
+      <div className="mb-4 grid size-12 place-items-center rounded-2xl bg-rose-100 text-rose-950">
+        <Icon />
+      </div>
+      <h3 className="text-lg font-semibold text-stone-950">{node.title}</h3>
+      <p className="mt-2 text-sm leading-6 text-stone-600">{node.detail}</p>
     </div>
   );
 }

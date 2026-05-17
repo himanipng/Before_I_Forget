@@ -53,6 +53,27 @@ select {
     background: #ffffff;
   }
 
+  .elder-field {
+    width: 100%;
+    border-radius: 1.5rem;
+    border: 1px solid #e3d4c6;
+    background: #fffdf9;
+    padding: 1.1rem 1.25rem;
+    color: #211815;
+    font-size: 1.25rem;
+    outline: none;
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease,
+      background 160ms ease;
+  }
+
+  .elder-field:focus {
+    border-color: #9f1239;
+    box-shadow: 0 0 0 5px #ffe4e6;
+    background: #ffffff;
+  }
+
   .action-button {
     display: inline-flex;
     align-items: center;
