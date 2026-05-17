@@ -118,12 +118,28 @@ export default function PeoplePage() {
     }
   }
 
+  async function ensureProfileForPerson(person: PersonView) {
+    if (person.profile) return person.profile;
+
+    const profile = await createProfile({
+      personName: person.personName,
+      relationship: person.relationship,
+      country: person.country,
+      language: person.language,
+      notes: person.memories.length ? "Created from an existing saved memory." : "",
+    });
+    setProfiles((current) => [profile, ...current.filter((item) => item.profileId !== profile.profileId)]);
+    setActiveKey(profile.profileId);
+    return profile;
+  }
+
   async function uploadPhoto(file: File | null) {
-    if (!file || !activePerson?.profile) return;
+    if (!file || !activePerson) return;
     setBusy("photo");
     setError("");
 
     try {
+      const targetProfile = await ensureProfileForPerson(activePerson);
       const upload = await getUploadUrl(file.name, file.type || "image/jpeg");
       if (!upload.uploadUrl.includes("mock-upload.before-i-forget.local")) {
         await fetch(upload.uploadUrl, {
@@ -140,10 +156,14 @@ export default function PeoplePage() {
         contentType: file.type || "image/jpeg",
         uploadedAt: new Date().toISOString(),
       };
-      const nextProfile = await addProfilePhoto(activePerson.profile.profileId, photo);
+      const nextProfile = await addProfilePhoto(targetProfile.profileId, photo);
       const localPreview = URL.createObjectURL(file);
       setPhotoPreviews((current) => ({ ...current, [photo.fileKey]: localPreview }));
-      setProfiles((current) => current.map((item) => (item.profileId === nextProfile.profileId ? nextProfile : item)));
+      setProfiles((current) => [
+        nextProfile,
+        ...current.filter((item) => item.profileId !== nextProfile.profileId),
+      ]);
+      setActiveKey(nextProfile.profileId);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Unable to upload photo.");
     } finally {
@@ -314,18 +334,16 @@ export default function PeoplePage() {
                         >
                           Add memory <ArrowRight size={17} />
                         </Link>
-                        {activePerson.profile ? (
-                          <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-stone-800 ring-1 ring-stone-200 transition hover:bg-stone-50">
-                            {busy === "photo" ? <Loader2 size={17} className="animate-spin" /> : <ImagePlus size={17} />}
-                            Add photo
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={(event) => uploadPhoto(event.target.files?.[0] || null)}
-                            />
-                          </label>
-                        ) : null}
+                        <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-stone-800 ring-1 ring-stone-200 transition hover:bg-stone-50">
+                          {busy === "photo" ? <Loader2 size={17} className="animate-spin" /> : <ImagePlus size={17} />}
+                          Add photo
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(event) => uploadPhoto(event.target.files?.[0] || null)}
+                          />
+                        </label>
                       </div>
                     </div>
                   </div>
@@ -358,6 +376,16 @@ export default function PeoplePage() {
                         <div className="rounded-2xl border border-dashed border-[#D4C4B4] bg-white/60 p-8 text-center">
                           <Camera className="mx-auto text-rose-900" />
                           <p className="mt-3 font-semibold text-stone-900">Add the first photo for {activePerson.personName}.</p>
+                          <label className="mt-4 inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-rose-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-950">
+                            {busy === "photo" ? <Loader2 size={17} className="animate-spin" /> : <ImagePlus size={17} />}
+                            Upload photo
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(event) => uploadPhoto(event.target.files?.[0] || null)}
+                            />
+                          </label>
                         </div>
                       )}
                     </div>

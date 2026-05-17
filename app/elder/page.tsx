@@ -15,6 +15,7 @@ const memoryTypes: Array<{ label: string; value: MemoryType }> = [
   { label: "Something hard", value: "hardship" },
   { label: "A thank-you message", value: "gratitude" },
 ];
+const languages: Language[] = ["English", "Hindi", "Spanish", "Mandarin", "Arabic", "Tagalog", "Vietnamese", "French", "other"];
 
 export default function ElderPage() {
   const [form, setForm] = useState({
@@ -145,6 +146,20 @@ export default function ElderPage() {
                 />
               </BigField>
             </div>
+
+            <BigField label="Language">
+              <select
+                value={form.language}
+                onChange={(event) => setForm({ ...form, language: event.target.value as Language })}
+                className="elder-field"
+              >
+                {languages.map((language) => (
+                  <option key={language} value={language}>
+                    {language}
+                  </option>
+                ))}
+              </select>
+            </BigField>
 
             <section>
               <p className="mb-3 text-2xl font-semibold text-stone-950">What kind of memory is it?</p>
