@@ -60,6 +60,7 @@ export type MemoryCard = {
   gratitudeLetter: string;
   createdAt: string;
   status: MemoryStatus;
+  provider?: "bedrock-claude" | "mock-ai";
   translatedText?: string;
   audioUrl?: string;
 };

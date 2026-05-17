@@ -20,7 +20,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export function startMemory(input: MemoryInput) {
-  return request<{ executionArn?: string; memoryCard?: MemoryCard; mock: boolean }>("/api/start-memory", {
+  return request<{
+    executionArn?: string;
+    memoryCard?: MemoryCard;
+    mock: boolean;
+    aiProvider?: "bedrock-claude" | "mock-ai";
+  }>("/api/start-memory", {
     method: "POST",
     body: JSON.stringify(input),
   });

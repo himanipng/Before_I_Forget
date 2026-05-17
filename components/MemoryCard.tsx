@@ -1,5 +1,5 @@
 import type { MemoryCardData } from "@/lib/types";
-import { BookOpen, Heart, MapPin, MessageCircle, Sparkles } from "lucide-react";
+import { BookOpen, Brain, Heart, MapPin, MessageCircle, Sparkles } from "lucide-react";
 
 type Props = {
   memory: MemoryCardData;
@@ -18,6 +18,9 @@ export function MemoryCard({ memory, actions }: Props) {
         <h1 className="mt-6 max-w-3xl text-4xl font-semibold leading-tight sm:text-5xl">{memory.title}</h1>
         <p className="mt-4 flex items-center gap-2 text-stone-700">
           <MapPin size={17} /> {memory.personName}{memory.country ? `, ${memory.country}` : ""}
+        </p>
+        <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1 text-sm font-semibold text-rose-950 ring-1 ring-rose-900/10">
+          <Brain size={16} /> {memory.provider === "bedrock-claude" ? "Generated with Claude via Amazon Bedrock" : "Demo fallback memory generator"}
         </p>
       </div>
       <div className="grid gap-6 p-6 sm:p-8 lg:grid-cols-[1.1fr_0.9fr]">

@@ -36,14 +36,14 @@ export async function startMemoryWorkflow(
 
       return {
         executionArn: result.executionArn,
-        memoryCard: { ...memoryCard, status: "RUNNING" },
+        memoryCard: { ...memoryCard, provider: generated.provider, status: "RUNNING" },
         mock: false,
         aiProvider: generated.provider,
         warning: generated.warning,
       };
     } catch (error) {
       return {
-        memoryCard,
+        memoryCard: { ...memoryCard, provider: generated.provider },
         mock: true,
         aiProvider: generated.provider,
         warning: error instanceof Error ? error.message : "Step Functions did not start; using mock memory.",
@@ -54,7 +54,7 @@ export async function startMemoryWorkflow(
   }
 
   return {
-    memoryCard,
+    memoryCard: { ...memoryCard, provider: generated.provider },
     mock: true,
     aiProvider: generated.provider,
     warning: generated.warning,

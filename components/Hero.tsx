@@ -3,8 +3,8 @@ import { ArrowRight, CheckCircle2, Cloud, Database, GitBranch, Mic, Sparkles } f
 
 const pipeline = [
   ["Input", "Nani, India, Hindi recipe memory"],
-  ["Step Functions", "Seven Lambda workflow starts"],
-  ["DynamoDB", "Memory card saved and archive-ready"],
+  ["Bedrock", "Claude drafts the keepsake copy"],
+  ["DynamoDB", "Memory card saves to the archive"],
 ];
 
 export function Hero() {
@@ -13,13 +13,13 @@ export function Hero() {
       <div className="mx-auto grid min-h-[calc(100vh-65px)] max-w-7xl items-center gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="relative z-10 max-w-3xl">
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-rose-900/10 bg-white/65 px-4 py-2 text-sm font-medium text-rose-950 shadow-sm">
-            <Sparkles size={16} /> Demo-ready AWS memory workflow
+            <Sparkles size={16} /> Demo-ready Claude and AWS workflow
           </div>
           <h1 className="max-w-4xl text-5xl font-semibold leading-[0.98] tracking-normal text-stone-950 sm:text-7xl">
             Before I Forget
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-700 sm:text-xl">
-            A focused demo for preserving family stories: enter one memory, start the serverless workflow, and open a saved keepsake card from the archive.
+            A focused demo for preserving family stories: enter one memory, start the serverless workflow, show Claude via Amazon Bedrock, and open a saved keepsake card from the archive.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
@@ -36,7 +36,7 @@ export function Hero() {
             </Link>
           </div>
           <div className="mt-8 grid gap-3 text-sm text-stone-700 sm:grid-cols-3">
-            {["Works with Vercel env vars", "Falls back to mock mode", "Archive reads saved cards"].map((item) => (
+            {["Claude badge on generated cards", "Friendly fallback copy", "Archive reads saved cards"].map((item) => (
               <div key={item} className="flex items-center gap-2 rounded-2xl bg-white/70 px-4 py-3 ring-1 ring-stone-900/5">
                 <CheckCircle2 size={17} className="text-rose-900" />
                 <span>{item}</span>
@@ -76,7 +76,7 @@ export function Hero() {
                 <Cloud size={19} className="text-rose-900" />
                 <div>
                   <p className="font-semibold">AWS path is visible</p>
-                  <p className="text-sm text-stone-600">S3, Transcribe, Translate, Step Functions, Lambda, DynamoDB</p>
+                  <p className="text-sm text-stone-600">S3, Transcribe, Translate, Step Functions, Lambda, DynamoDB, Bedrock</p>
                 </div>
               </div>
             </div>

@@ -3,6 +3,7 @@ import { Navbar } from "@/components/Navbar";
 import { BirthdayBanner } from "@/components/BirthdayBanner";
 import { ArchiveCard } from "@/components/ArchiveCard";
 import type { ArchiveCardData } from "@/components/ArchiveCard";
+import { ArrowRight, Brain, CheckCircle2, Cloud, Database, GitBranch } from "lucide-react";
 
 const demoCards: ArchiveCardData[] = [
   {
@@ -74,6 +75,74 @@ export default function Home() {
       <main className="pb-20">
         <BirthdayBanner />
 
+        <section className="mx-auto mt-10 grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose-900">Live Hackathon Demo</p>
+            <h1
+              className="mt-3 max-w-3xl text-5xl leading-tight text-stone-900 sm:text-6xl"
+              style={{ fontFamily: "var(--font-lora), Georgia, serif", fontStyle: "italic" }}
+            >
+              Before I Forget
+            </h1>
+            <p className="mt-4 max-w-2xl text-lg leading-8 text-stone-600">
+              Start with one family memory, let Claude through Amazon Bedrock shape the keepsake, then show judges the saved card and AWS architecture without breaking the presentation flow.
+            </p>
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/start"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#881337] px-6 py-3 font-semibold text-white shadow-lg shadow-rose-950/15 transition hover:bg-[#4c0519]"
+              >
+                Start Memory Workflow <ArrowRight size={18} />
+              </Link>
+              <Link
+                href="/architecture"
+                className="inline-flex items-center justify-center rounded-full border border-[#DFD0C0] bg-white/70 px-6 py-3 font-semibold text-stone-800 shadow-sm transition hover:bg-white"
+              >
+                View Architecture
+              </Link>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-[#DFD0C0] bg-white/75 p-5 shadow-xl shadow-rose-950/8">
+            <div className="flex items-center justify-between gap-3 border-b border-[#E7D8C7] pb-4">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-rose-900">Judge path</p>
+                <h2 className="mt-1 text-2xl font-semibold text-stone-950">Three clicks that tell the story</h2>
+              </div>
+              <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800">Ready</span>
+            </div>
+
+            <div className="mt-5 grid gap-4">
+              {[
+                {
+                  icon: <GitBranch size={18} />,
+                  title: "Run the workflow",
+                  body: "Use the prefilled Nani recipe memory and start the AWS-backed flow.",
+                },
+                {
+                  icon: <Brain size={18} />,
+                  title: "Show Bedrock output",
+                  body: "The generated card now labels Claude via Amazon Bedrock when real AI is used.",
+                },
+                {
+                  icon: <Database size={18} />,
+                  title: "Open Archive",
+                  body: "Saved DynamoDB memories load in the archive, with the fallback path kept demo-safe.",
+                },
+              ].map((item, index) => (
+                <div key={item.title} className="grid grid-cols-[2.25rem_1fr] gap-3">
+                  <div className="grid size-9 place-items-center rounded-full bg-rose-100 text-rose-950">{item.icon}</div>
+                  <div className="rounded-2xl bg-[#fff8f1] p-4 ring-1 ring-rose-900/10">
+                    <p className="text-xs font-bold tracking-widest text-rose-900">0{index + 1}</p>
+                    <p className="mt-1 font-semibold text-stone-950">{item.title}</p>
+                    <p className="mt-1 text-sm leading-6 text-stone-600">{item.body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         <section className="mx-auto mt-10 max-w-7xl px-4 sm:px-6">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose-900">Archive</p>
           <h1
@@ -123,15 +192,15 @@ function TechSection() {
         className="mt-2 max-w-2xl text-3xl leading-snug text-stone-900 sm:text-4xl"
         style={{ fontFamily: "var(--font-lora), Georgia, serif" }}
       >
-        A small ritual — from question to keepsake.
+        A small ritual from question to keepsake.
       </h2>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { step: "01", label: "Choose a person", body: "Start with Nani, a friend, a teacher — anyone whose voice matters." },
-          { step: "02", label: "Interview gently", body: "AI generates questions shaped by relationship, culture, and goal." },
+          { step: "01", label: "Choose a person", body: "Start with Nani, a friend, a teacher, or anyone whose voice matters." },
+          { step: "02", label: "Interview gently", body: "Claude via Amazon Bedrock shapes questions and memory copy when AWS is available." },
           { step: "03", label: "Preserve across language", body: "AWS Translate carries the story across any language barrier." },
-          { step: "04", label: "Save the memory", body: "Audio via Polly, text via DynamoDB, files via S3 — all serverless." },
+          { step: "04", label: "Save the memory", body: "Audio via Polly, text via DynamoDB, and files via S3, all serverless." },
         ].map(({ step, label, body }) => (
           <div key={step} className="rounded-2xl border border-[#DFD0C0] bg-white/70 p-5">
             <p className="text-xs font-bold tracking-widest text-rose-900">{step}</p>
@@ -141,17 +210,25 @@ function TechSection() {
         ))}
       </div>
 
-      <div className="mt-6 rounded-2xl bg-stone-950 px-6 py-5 text-white">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-400">AWS Services</p>
+      <div className="mt-6 rounded-2xl border border-[#DFD0C0] bg-white/75 px-6 py-5 text-stone-950 shadow-sm">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose-900">AWS Services</p>
+            <p className="mt-2 text-sm leading-6 text-stone-600">The demo shows the real provider when Bedrock runs and keeps fallback messaging friendly when AWS stalls.</p>
+          </div>
+          <div className="inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1 text-sm font-semibold text-rose-950 ring-1 ring-rose-900/10">
+            <CheckCircle2 size={16} /> Demo-safe
+          </div>
+        </div>
         <div className="mt-4 flex flex-wrap gap-3">
           {["S3", "Step Functions", "Transcribe", "Translate", "Polly", "DynamoDB", "Lambda", "Bedrock"].map((s) => (
-            <span key={s} className="rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-white ring-1 ring-white/10">
+            <span key={s} className="rounded-full bg-[#fff8f1] px-3 py-1 text-sm font-medium text-stone-800 ring-1 ring-rose-900/10">
               {s}
             </span>
           ))}
         </div>
-        <Link href="/architecture" className="mt-4 inline-block text-sm font-medium text-stone-400 underline underline-offset-4 transition hover:text-white">
-          See full architecture diagram →
+        <Link href="/architecture" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-rose-900 underline underline-offset-4 transition hover:text-rose-950">
+          <Cloud size={16} /> See full architecture diagram
         </Link>
       </div>
     </section>

@@ -15,7 +15,7 @@ const memoryTypes: MemoryType[] = ["life story", "recipe", "advice", "hardship",
 const goals: Goal[] = ["preserve story", "write thank-you letter", "translate memory", "create audio keepsake"];
 const demoSteps: Array<[LucideIcon, string]> = [
   [PlayCircle, "Click Start memory workflow"],
-  [GitBranch, "Step Functions starts in the background"],
+  [GitBranch, "Claude via Bedrock drafts the card"],
   [Database, "Memory opens and appears in Archive"],
 ];
 
@@ -28,7 +28,8 @@ export default function StartPage() {
     language: "Hindi" as Language,
     memoryType: "recipe" as MemoryType,
     goal: "preserve story" as Goal,
-    storyText: "",
+    storyText:
+      "She made chai every morning before school. She crushed ginger with cardamom and waited until the kitchen smelled warm.",
   });
   const [loading, setLoading] = useState(false);
   const [audioBusy, setAudioBusy] = useState(false);
@@ -57,33 +58,25 @@ export default function StartPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Unable to start Amazon Transcribe.");
-      }
-
-      if (data.provider === "mock-transcribe") {
-        throw new Error(data.warning || "Amazon Transcribe was unavailable, so no real transcript was written.");
+        throw new Error("The transcript could not start. You can keep the typed story and continue the demo.");
       }
 
       if (data.mode === "async" && data.jobName) {
         setAudioStatus("Transcribe is processing the recording...");
         const transcript = await waitForTranscript(data.jobName);
         if (!transcript.trim()) {
-          throw new Error("Amazon Transcribe finished but did not return text. Try a clearer recording or upload an audio file.");
+          throw new Error("The transcript came back empty. You can keep the typed story and continue the demo.");
         }
         setForm((current) => ({ ...current, storyText: transcript }));
       } else if (data.transcript?.trim()) {
         setForm((current) => ({ ...current, storyText: data.transcript || current.storyText }));
       } else {
-        throw new Error("Amazon Transcribe did not return transcript text yet. Try again in a moment.");
+        throw new Error("The transcript is taking longer than expected. You can keep the typed story and continue the demo.");
       }
 
-      if (data.warning) {
-        setAudioStatus(`Transcribe warning: ${data.warning}`);
-      } else {
-        setAudioStatus("Real Amazon Transcribe transcript filled into the story field.");
-      }
+      setAudioStatus(data.provider === "mock-transcribe" ? "Transcript filled with demo-safe fallback." : "Real Amazon Transcribe transcript filled into the story field.");
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Unable to transcribe this audio.");
+      setError(caught instanceof Error ? caught.message : "Unable to fill the transcript. You can keep the typed story and continue the demo.");
       setAudioStatus("");
     } finally {
       setAudioBusy(false);
@@ -180,7 +173,7 @@ export default function StartPage() {
                   <CheckCircle2 size={16} /> Fallback safe
                 </p>
                 <p className="mt-2 text-sm leading-6 text-stone-700">
-                  If AWS or Vercel slows down, the same button falls back to a mock card so the presentation keeps moving.
+                  If AWS or Vercel slows down, the same button creates a demo-safe card so the presentation keeps moving.
                 </p>
               </div>
             </div>
@@ -276,7 +269,7 @@ async function waitForTranscript(jobName: string) {
     const data = await response.json();
 
     if (data.provider === "mock-transcribe") {
-      throw new Error(data.warning || "Amazon Transcribe status was unavailable.");
+      return data.transcript || "";
     }
 
     if (data.status === "COMPLETED") {
@@ -284,11 +277,11 @@ async function waitForTranscript(jobName: string) {
     }
 
     if (data.status === "FAILED") {
-      throw new Error(data.failureReason || "Amazon Transcribe failed for this audio.");
+      throw new Error("The transcript could not be completed for this recording. You can keep the typed story and continue the demo.");
     }
   }
 
-  throw new Error("Amazon Transcribe is still processing. Wait a few seconds and start Transcribe again.");
+  throw new Error("The transcript is still processing. You can keep the typed story and continue the demo.");
 }
 
 async function waitForWorkflow(executionArn: string): Promise<MemoryCard | null> {
