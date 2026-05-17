@@ -46,7 +46,7 @@ export async function startMemoryWorkflow(
         memoryCard: { ...memoryCard, provider: generated.provider },
         mock: true,
         aiProvider: generated.provider,
-        warning: error instanceof Error ? error.message : "Step Functions did not start; using mock memory.",
+        warning: error instanceof Error ? error.message : "Step Functions did not start; using backup memory.",
       };
     } finally {
       clearTimeout(timeout);

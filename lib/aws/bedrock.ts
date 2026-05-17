@@ -24,7 +24,7 @@ type MemoryCardFields = {
 const SYSTEM_PROMPT = [
   "You generate emotionally precise family memory keepsakes for Before I Forget.",
   "Return only valid JSON. Do not wrap the JSON in markdown.",
-  "Keep the tone warm, specific, culturally careful, and demo-safe.",
+  "Keep the tone warm, specific, culturally careful, and family-safe.",
 ].join(" ");
 
 function asErrorMessage(error: unknown) {
@@ -46,7 +46,7 @@ async function invokeClaudeJson<T>(prompt: string): Promise<T> {
   const client = getBedrockRuntimeClient();
 
   if (!hasBedrockConfig || !client) {
-    throw new Error("Bedrock config missing; using mock AI.");
+    throw new Error("Bedrock config missing; using backup AI.");
   }
 
   const response = await client.send(

@@ -28,6 +28,6 @@ export const env = serverEnv;
 
 export function assertAwsConfig() {
   if (!hasAwsConfig) {
-    throw new Error("AWS config missing, using mock mode.");
+    throw new Error("AWS config missing, using backup mode.");
   }
 }

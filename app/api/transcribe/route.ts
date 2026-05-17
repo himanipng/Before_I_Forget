@@ -35,7 +35,7 @@ export async function POST(request: Request) {
         provider: "mock-transcribe",
         mode: "mock",
         status: "COMPLETED",
-        warning: error instanceof Error ? error.message : "Amazon Transcribe was unavailable, so the demo used a mock transcript.",
+        warning: error instanceof Error ? error.message : "Amazon Transcribe was unavailable, so the backup transcript path was used.",
       });
     }
   }
@@ -67,7 +67,7 @@ export async function GET(request: Request) {
       mode: "mock",
       status: "COMPLETED",
       transcript: simulateTranscript(jobName),
-      warning: error instanceof Error ? error.message : "Amazon Transcribe status was unavailable, so the demo used a mock transcript.",
+      warning: error instanceof Error ? error.message : "Amazon Transcribe status was unavailable, so the backup transcript path was used.",
     });
   }
 

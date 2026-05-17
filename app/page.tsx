@@ -77,7 +77,7 @@ export default function Home() {
 
         <section className="mx-auto mt-10 grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose-900">Live Hackathon Demo</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose-900">Live Memory Workflow</p>
             <h1
               className="mt-3 max-w-3xl text-5xl leading-tight text-stone-900 sm:text-6xl"
               style={{ fontFamily: "var(--font-lora), Georgia, serif", fontStyle: "italic" }}
@@ -85,7 +85,7 @@ export default function Home() {
               Before I Forget
             </h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-stone-600">
-              Start with one family memory, let Claude through Amazon Bedrock shape the keepsake, then show judges the saved card and AWS architecture without breaking the presentation flow.
+              Start with one family memory, let Claude through Amazon Bedrock shape the keepsake, then open the saved card and AWS architecture in a smooth end-to-end flow.
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <Link
@@ -106,7 +106,7 @@ export default function Home() {
           <div className="rounded-2xl border border-[#DFD0C0] bg-white/75 p-5 shadow-xl shadow-rose-950/8">
             <div className="flex items-center justify-between gap-3 border-b border-[#E7D8C7] pb-4">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-rose-900">Judge path</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-rose-900">Workflow path</p>
                 <h2 className="mt-1 text-2xl font-semibold text-stone-950">Three clicks that tell the story</h2>
               </div>
               <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800">Ready</span>
@@ -127,7 +127,7 @@ export default function Home() {
                 {
                   icon: <Database size={18} />,
                   title: "Open Archive",
-                  body: "Saved DynamoDB memories load in the archive, with the fallback path kept demo-safe.",
+                  body: "Saved DynamoDB memories load in the archive, with a backup path that keeps the experience moving.",
                 },
               ].map((item, index) => (
                 <div key={item.title} className="grid grid-cols-[2.25rem_1fr] gap-3">
@@ -214,10 +214,10 @@ function TechSection() {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose-900">AWS Services</p>
-            <p className="mt-2 text-sm leading-6 text-stone-600">The demo shows the real provider when Bedrock runs and keeps fallback messaging friendly when AWS stalls.</p>
+            <p className="mt-2 text-sm leading-6 text-stone-600">The app shows the real provider when Bedrock runs and keeps status messages friendly when AWS takes longer than expected.</p>
           </div>
           <div className="inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1 text-sm font-semibold text-rose-950 ring-1 ring-rose-900/10">
-            <CheckCircle2 size={16} /> Demo-safe
+            <CheckCircle2 size={16} /> Ready
           </div>
         </div>
         <div className="mt-4 flex flex-wrap gap-3">

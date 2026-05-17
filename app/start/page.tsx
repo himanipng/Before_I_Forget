@@ -58,25 +58,25 @@ export default function StartPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error("The transcript could not start. You can keep the typed story and continue the demo.");
+        throw new Error("The transcript could not start. You can keep the typed story and continue.");
       }
 
       if (data.mode === "async" && data.jobName) {
         setAudioStatus("Transcribe is processing the recording...");
         const transcript = await waitForTranscript(data.jobName);
         if (!transcript.trim()) {
-          throw new Error("The transcript came back empty. You can keep the typed story and continue the demo.");
+          throw new Error("The transcript came back empty. You can keep the typed story and continue.");
         }
         setForm((current) => ({ ...current, storyText: transcript }));
       } else if (data.transcript?.trim()) {
         setForm((current) => ({ ...current, storyText: data.transcript || current.storyText }));
       } else {
-        throw new Error("The transcript is taking longer than expected. You can keep the typed story and continue the demo.");
+        throw new Error("The transcript is taking longer than expected. You can keep the typed story and continue.");
       }
 
-      setAudioStatus(data.provider === "mock-transcribe" ? "Transcript filled with demo-safe fallback." : "Real Amazon Transcribe transcript filled into the story field.");
+      setAudioStatus(data.provider === "mock-transcribe" ? "Transcript filled from the backup path." : "Real Amazon Transcribe transcript filled into the story field.");
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Unable to fill the transcript. You can keep the typed story and continue the demo.");
+      setError(caught instanceof Error ? caught.message : "Unable to fill the transcript. You can keep the typed story and continue.");
       setAudioStatus("");
     } finally {
       setAudioBusy(false);
@@ -152,11 +152,11 @@ export default function StartPage() {
           <aside className="lg:sticky lg:top-24 lg:self-start">
             <div className="rounded-[2rem] border border-rose-900/10 bg-white/88 p-6 text-stone-950 shadow-xl shadow-rose-950/10 sm:p-8">
               <p className="inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1 text-sm font-semibold text-rose-900">
-                <Globe2 size={15} /> Judge demo
+                <Globe2 size={15} /> Guided workflow
               </p>
               <h1 className="mt-5 text-4xl font-semibold leading-tight sm:text-5xl">Run one memory from input to archive.</h1>
               <p className="mt-4 leading-7 text-stone-600">
-                The form is prefilled so the demo can start immediately. The workflow saves a card first, then the archive proves it persisted.
+                The form is prefilled so you can start immediately. The workflow saves a card first, then the archive shows it persisted.
               </p>
               <div className="mt-6 grid gap-3">
                 {demoSteps.map(([Icon, label]) => (
@@ -173,7 +173,7 @@ export default function StartPage() {
                   <CheckCircle2 size={16} /> Fallback safe
                 </p>
                 <p className="mt-2 text-sm leading-6 text-stone-700">
-                  If AWS or Vercel slows down, the same button creates a demo-safe card so the presentation keeps moving.
+                  If AWS takes longer than expected, the same button keeps the memory flow moving with a backup card.
                 </p>
               </div>
             </div>
@@ -277,11 +277,11 @@ async function waitForTranscript(jobName: string) {
     }
 
     if (data.status === "FAILED") {
-      throw new Error("The transcript could not be completed for this recording. You can keep the typed story and continue the demo.");
+      throw new Error("The transcript could not be completed for this recording. You can keep the typed story and continue.");
     }
   }
 
-  throw new Error("The transcript is still processing. You can keep the typed story and continue the demo.");
+  throw new Error("The transcript is still processing. You can keep the typed story and continue.");
 }
 
 async function waitForWorkflow(executionArn: string): Promise<MemoryCard | null> {

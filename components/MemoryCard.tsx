@@ -20,7 +20,7 @@ export function MemoryCard({ memory, actions }: Props) {
           <MapPin size={17} /> {memory.personName}{memory.country ? `, ${memory.country}` : ""}
         </p>
         <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1 text-sm font-semibold text-rose-950 ring-1 ring-rose-900/10">
-          <Brain size={16} /> {memory.provider === "bedrock-claude" ? "Generated with Claude via Amazon Bedrock" : "Demo fallback memory generator"}
+          <Brain size={16} /> {memory.provider === "bedrock-claude" ? "Generated with Claude via Amazon Bedrock" : "Generated with backup memory generator"}
         </p>
       </div>
       <div className="grid gap-6 p-6 sm:p-8 lg:grid-cols-[1.1fr_0.9fr]">

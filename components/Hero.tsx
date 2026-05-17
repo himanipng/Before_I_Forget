@@ -13,20 +13,20 @@ export function Hero() {
       <div className="mx-auto grid min-h-[calc(100vh-65px)] max-w-7xl items-center gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="relative z-10 max-w-3xl">
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-rose-900/10 bg-white/65 px-4 py-2 text-sm font-medium text-rose-950 shadow-sm">
-            <Sparkles size={16} /> Demo-ready Claude and AWS workflow
+            <Sparkles size={16} /> Claude and AWS memory workflow
           </div>
           <h1 className="max-w-4xl text-5xl font-semibold leading-[0.98] tracking-normal text-stone-950 sm:text-7xl">
             Before I Forget
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-700 sm:text-xl">
-            A focused demo for preserving family stories: enter one memory, start the serverless workflow, show Claude via Amazon Bedrock, and open a saved keepsake card from the archive.
+            Preserve family stories by entering one memory, starting the serverless workflow, showing Claude via Amazon Bedrock, and opening a saved keepsake card from the archive.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/start"
               className="inline-flex items-center justify-center gap-2 rounded-full bg-rose-900 px-6 py-3 font-semibold text-white shadow-lg shadow-rose-950/15 transition hover:bg-rose-950"
             >
-              Run the judge demo <ArrowRight size={18} />
+              Start a memory <ArrowRight size={18} />
             </Link>
             <Link
               href="/archive"
@@ -36,7 +36,7 @@ export function Hero() {
             </Link>
           </div>
           <div className="mt-8 grid gap-3 text-sm text-stone-700 sm:grid-cols-3">
-            {["Claude badge on generated cards", "Friendly fallback copy", "Archive reads saved cards"].map((item) => (
+            {["Claude badge on generated cards", "Clear status messages", "Archive reads saved cards"].map((item) => (
               <div key={item} className="flex items-center gap-2 rounded-2xl bg-white/70 px-4 py-3 ring-1 ring-stone-900/5">
                 <CheckCircle2 size={17} className="text-rose-900" />
                 <span>{item}</span>
@@ -49,7 +49,7 @@ export function Hero() {
             <div className="border-b border-rose-900/10 bg-[#fff8f1] px-5 py-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-rose-900">Live demo flow</p>
+                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-rose-900">Live workflow</p>
                   <h2 className="mt-1 text-2xl font-semibold">Nani&apos;s chai memory</h2>
                 </div>
                 <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800">Ready</span>

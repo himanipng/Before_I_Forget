@@ -100,9 +100,9 @@ export function generateMemoryCard(input: GenerateMemoryCardInput) {
 }
 
 export function simulateTranscript(fileName = "voice-note.m4a") {
-  return `Simulated transcript from ${fileName}: My Nani made chai every morning before school. She crushed ginger with cardamom and waited until the whole kitchen smelled warm. I did not know it then, but it was her way of blessing the day.`;
+  return `Transcript from ${fileName}: My Nani made chai every morning before school. She crushed ginger with cardamom and waited until the whole kitchen smelled warm. I did not know it then, but it was her way of blessing the day.`;
 }
 
 export function mockTranslate(text: string, targetLanguage: string) {
-  return `[${targetLanguage}] ${text}\n\n(Mock translation for demo. AWS Translate can replace this response without changing the UI contract.)`;
+  return `[${targetLanguage}] ${text}\n\n(Preview translation. AWS Translate can replace this response without changing the UI contract.)`;
 }

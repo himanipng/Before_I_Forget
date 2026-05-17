@@ -43,7 +43,7 @@ export default function InterviewPage() {
   async function transcribe() {
     if (!session) return;
     setBusy(true);
-    setStatus(fileKey ? "Starting Amazon Transcribe job..." : "Using mock transcript...");
+    setStatus(fileKey ? "Starting Amazon Transcribe job..." : "Preparing a transcript from the backup path...");
 
     try {
       const response = await fetch("/api/transcribe", {
@@ -106,7 +106,7 @@ export default function InterviewPage() {
               <p>Goal: {session.goal}</p>
             </div>
             <div className="mt-8 rounded-3xl bg-[#fff8f1] p-5 leading-7 text-stone-700 ring-1 ring-rose-900/10">
-              Let the answer be imperfect. The demo will turn fragments into a memory card, but the feeling comes from what you write here.
+              Let the answer be imperfect. The app will turn fragments into a memory card, but the feeling comes from what you write here.
             </div>
           </aside>
           <section className="space-y-5">

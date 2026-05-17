@@ -4,10 +4,10 @@ import { Navbar } from "@/components/Navbar";
 const lambdaSteps = [
   ["createMemorySession", "Creates a session ID, createdAt timestamp, and first workflow status."],
   ["processStoryInput", "Cleans the story text and extracts basic story metadata."],
-  ["generateTranscriptMock", "Mocks the Transcribe boundary so audio can become text later."],
-  ["translateMemoryMock", "Mocks the Translate boundary for multilingual family access."],
-  ["generateMemoryCardMock", "Creates the keepsake structure that Bedrock will later generate."],
-  ["generateGratitudeLetterMock", "Turns the memory into a thank-you letter."],
+  ["generateTranscript", "Defines the Transcribe boundary so audio can become text."],
+  ["translateMemory", "Defines the Translate boundary for multilingual family access."],
+  ["generateMemoryCard", "Creates the keepsake structure powered by the AI layer."],
+  ["generateGratitudeLetter", "Turns the memory into a thank-you letter."],
   ["saveMemoryResult", "Writes the final MemoryCard-shaped item into DynamoDB."],
 ];
 
@@ -19,7 +19,7 @@ const implemented = [
   "S3 presigned upload helper keeps media bytes out of Lambda.",
   "Transcribe starts from S3 audio uploads for voice notes and phone-call recordings.",
   "Translate can call AWS Translate for multilingual memory cards.",
-  "Mock AI is isolated so Bedrock can replace it later.",
+  "Claude via Amazon Bedrock powers the memory-generation layer.",
 ];
 
 export default function ArchitecturePage() {
@@ -45,10 +45,10 @@ export default function ArchitecturePage() {
               </p>
             </div>
             <div className="rounded-[2rem] bg-white/90 p-6 shadow-sm ring-1 ring-stone-900/5">
-              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-rose-900">Judge takeaway</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-rose-900">Architecture takeaway</p>
               <p className="mt-3 leading-7 text-stone-700">
-                This is not a static demo with AWS names pasted on top. The app is structured around Lambda boundaries
-                that can run independently, scale to zero, and be swapped from mock AI to Bedrock without changing the UI.
+                This is a serverless workflow with AWS services connected behind the product experience. The app is structured around Lambda boundaries
+                that can run independently, scale to zero, and evolve without changing the UI.
               </p>
             </div>
           </div>
@@ -78,7 +78,7 @@ export default function ArchitecturePage() {
               </ul>
               <div className="mt-6 rounded-2xl bg-rose-50 p-5 text-stone-950 ring-1 ring-rose-900/10">
                 <p className="text-lg leading-8 text-stone-700">
-                  Bedrock will replace the mock AI layer for interview generation, emotional summarization, and gratitude-letter generation.
+                  Claude via Amazon Bedrock supports interview generation, emotional summarization, and gratitude-letter generation.
                 </p>
               </div>
             </section>

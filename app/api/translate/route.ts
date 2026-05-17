@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       sourceLanguage: sourceLanguage || "auto",
       targetLanguage: safeTarget,
       provider: "mock-translate",
-      warning: error instanceof Error ? error.message : "AWS Translate was unavailable, so the demo used mock translation.",
+      warning: error instanceof Error ? error.message : "AWS Translate was unavailable, so the backup translation path was used.",
     });
   }
 
