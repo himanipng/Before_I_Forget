@@ -47,7 +47,12 @@ aws s3api put-bucket-cors \
       {
         "AllowedHeaders": ["*"],
         "AllowedMethods": ["PUT", "GET", "HEAD"],
-        "AllowedOrigins": ["*"],
+        "AllowedOrigins": [
+          "http://localhost:3000",
+          "https://before-i-forget-eosin.vercel.app",
+          "https://before-i-forget-git-main-beforeiforget.vercel.app",
+          "https://*.vercel.app"
+        ],
         "ExposeHeaders": ["ETag"],
         "MaxAgeSeconds": 3000
       }

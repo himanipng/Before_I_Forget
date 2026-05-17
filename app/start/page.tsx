@@ -28,8 +28,7 @@ export default function StartPage() {
     language: "Hindi" as Language,
     memoryType: "recipe" as MemoryType,
     goal: "preserve story" as Goal,
-    storyText:
-      "She made chai every morning before school. She crushed ginger with cardamom and waited until the kitchen smelled warm.",
+    storyText: "",
   });
   const [loading, setLoading] = useState(false);
   const [audioBusy, setAudioBusy] = useState(false);
@@ -40,8 +39,13 @@ export default function StartPage() {
   const [error, setError] = useState("");
 
   async function transcribeAudio() {
+    if (!fileKey) {
+      setAudioStatus("Record or upload audio first, then start Amazon Transcribe.");
+      return;
+    }
+
     setAudioBusy(true);
-    setAudioStatus(fileKey ? "Starting Amazon Transcribe..." : "Using a mock transcript...");
+    setAudioStatus("Starting Amazon Transcribe...");
     setError("");
 
     try {
@@ -52,18 +56,31 @@ export default function StartPage() {
       });
       const data = await response.json();
 
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to start Amazon Transcribe.");
+      }
+
+      if (data.provider === "mock-transcribe") {
+        throw new Error(data.warning || "Amazon Transcribe was unavailable, so no real transcript was written.");
+      }
+
       if (data.mode === "async" && data.jobName) {
         setAudioStatus("Transcribe is processing the recording...");
         const transcript = await waitForTranscript(data.jobName);
-        setForm((current) => ({ ...current, storyText: transcript || "Transcription job started. Try again in a moment if the text is still processing." }));
-      } else {
+        if (!transcript.trim()) {
+          throw new Error("Amazon Transcribe finished but did not return text. Try a clearer recording or upload an audio file.");
+        }
+        setForm((current) => ({ ...current, storyText: transcript }));
+      } else if (data.transcript?.trim()) {
         setForm((current) => ({ ...current, storyText: data.transcript || current.storyText }));
+      } else {
+        throw new Error("Amazon Transcribe did not return transcript text yet. Try again in a moment.");
       }
 
       if (data.warning) {
-        setAudioStatus(`Demo fallback used: ${data.warning}`);
+        setAudioStatus(`Transcribe warning: ${data.warning}`);
       } else {
-        setAudioStatus("Transcript filled into the story field.");
+        setAudioStatus("Real Amazon Transcribe transcript filled into the story field.");
       }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Unable to transcribe this audio.");
@@ -212,7 +229,7 @@ export default function StartPage() {
                     value={form.storyText}
                     onChange={(e) => setForm({ ...form, storyText: e.target.value })}
                     className="field min-h-40 resize-none leading-7"
-                    placeholder="Write the story you want preserved..."
+                    placeholder="Record or upload audio to fill this with Amazon Transcribe, or type the story here..."
                   />
                 </Field>
               </div>
@@ -253,10 +270,14 @@ export default function StartPage() {
 }
 
 async function waitForTranscript(jobName: string) {
-  for (let attempt = 0; attempt < 10; attempt += 1) {
+  for (let attempt = 0; attempt < 20; attempt += 1) {
     await new Promise((resolve) => setTimeout(resolve, attempt === 0 ? 1200 : 3000));
     const response = await fetch(`/api/transcribe?jobName=${encodeURIComponent(jobName)}`);
     const data = await response.json();
+
+    if (data.provider === "mock-transcribe") {
+      throw new Error(data.warning || "Amazon Transcribe status was unavailable.");
+    }
 
     if (data.status === "COMPLETED") {
       return data.transcript || "";
@@ -267,7 +288,7 @@ async function waitForTranscript(jobName: string) {
     }
   }
 
-  return "";
+  throw new Error("Amazon Transcribe is still processing. Wait a few seconds and start Transcribe again.");
 }
 
 async function waitForWorkflow(executionArn: string): Promise<MemoryCard | null> {
