@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Globe2, Mic } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
+import { UploadBox } from "@/components/UploadBox";
 import { getWorkflowStatus, startMemory } from "@/lib/api";
 import type { Goal, Language, MemoryCard, MemoryType, Relationship } from "@/lib/types";
 
@@ -25,8 +26,46 @@ export default function StartPage() {
       "She made chai every morning before school. She crushed ginger with cardamom and waited until the kitchen smelled warm.",
   });
   const [loading, setLoading] = useState(false);
+  const [audioBusy, setAudioBusy] = useState(false);
+  const [fileName, setFileName] = useState("nani-chai-story.m4a");
+  const [fileKey, setFileKey] = useState("");
+  const [audioStatus, setAudioStatus] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
   const [error, setError] = useState("");
+
+  async function transcribeAudio() {
+    setAudioBusy(true);
+    setAudioStatus(fileKey ? "Starting Amazon Transcribe..." : "Using a mock transcript...");
+    setError("");
+
+    try {
+      const response = await fetch("/api/transcribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileName, fileKey, language: form.language, identifyLanguage: true }),
+      });
+      const data = await response.json();
+
+      if (data.mode === "async" && data.jobName) {
+        setAudioStatus("Transcribe is processing the recording...");
+        const transcript = await waitForTranscript(data.jobName);
+        setForm((current) => ({ ...current, storyText: transcript || "Transcription job started. Try again in a moment if the text is still processing." }));
+      } else {
+        setForm((current) => ({ ...current, storyText: data.transcript || current.storyText }));
+      }
+
+      if (data.warning) {
+        setAudioStatus(`Demo fallback used: ${data.warning}`);
+      } else {
+        setAudioStatus("Transcript filled into the story field.");
+      }
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Unable to transcribe this audio.");
+      setAudioStatus("");
+    } finally {
+      setAudioBusy(false);
+    }
+  }
 
   async function startInterview() {
     setLoading(true);
@@ -140,6 +179,17 @@ export default function StartPage() {
                   />
                 </Field>
               </div>
+              <div className="md:col-span-2">
+                <UploadBox
+                  fileName={fileName}
+                  fileKey={fileKey}
+                  onFileNameChange={setFileName}
+                  onFileKeyChange={setFileKey}
+                  onTranscribe={transcribeAudio}
+                  isBusy={audioBusy}
+                />
+                {audioStatus ? <p className="mt-3 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">{audioStatus}</p> : null}
+              </div>
             </div>
             {error ? (
               <p className="mt-5 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-900">{error}</p>
@@ -163,6 +213,24 @@ export default function StartPage() {
       </main>
     </>
   );
+}
+
+async function waitForTranscript(jobName: string) {
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    await new Promise((resolve) => setTimeout(resolve, attempt === 0 ? 1200 : 3000));
+    const response = await fetch(`/api/transcribe?jobName=${encodeURIComponent(jobName)}`);
+    const data = await response.json();
+
+    if (data.status === "COMPLETED") {
+      return data.transcript || "";
+    }
+
+    if (data.status === "FAILED") {
+      throw new Error(data.failureReason || "Amazon Transcribe failed for this audio.");
+    }
+  }
+
+  return "";
 }
 
 async function waitForWorkflow(executionArn: string): Promise<MemoryCard | null> {
